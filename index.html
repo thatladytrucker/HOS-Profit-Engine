@@ -305,6 +305,8 @@
       const fixedDay = enteredMiles > 0 ? dailyNut() : 0;
 
       const totalCosts = fuelCost + iftaReserve + maintenance + dispatchFee + tarpCost + fixedDay;
+      const driverCpm = enteredMiles > 0 ? totalCosts / enteredMiles : 0;
+
       state.currentProfit = gross - totalCosts;
       state.breakEven = totalCosts;
       state.profitGoalAsk = totalCosts + state.targetProfit;
