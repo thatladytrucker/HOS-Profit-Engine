@@ -109,29 +109,20 @@
   </div>
 
   <div id="vaultDrawer" class="drawer">
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4">
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4">
 
-      <p class="small-note md:col-span-2">
-        Tap Edit to change the Vault numbers. Changes save automatically and update the load calculation immediately.
-      </p>
-
-      <div>
-        <label class="label">Average MPG</label>
-        <input id="mpg" class="field" type="number" min="1" step="0.1">
-      </div>
-
-      <div>
-        <label class="label">Target Profit Per Load ($)</label>
-        <input id="targetProfit" class="field" type="number" min="0" step="1">
-      </div>
-<div class="md:col-span-2 soft-card rounded-2xl p-4 text-center">
-  <p class="small-note">Driver CPM / Cost Per Mile</p>
-  <p id="driverCpmRead" class="text-3xl font-black text-emerald-300">$0.00</p>
-  <p class="small-note mt-1">Total expenses divided by total loaded + deadhead miles.</p>
-</div>
+    <div>
+      <label class="label">Average MPG</label>
+      <input id="mpg" class="field" type="number" min="1" step="0.1">
     </div>
+
+    <div>
+      <label class="label">Target Profit Per Load ($)</label>
+      <input id="targetProfit" class="field" type="number" min="0" step="1">
+    </div>
+
   </div>
-</section>
+</div>
 
     <!-- 3. THE LOAD DECK -->
     <section class="glass rounded-3xl p-5 space-y-5">
