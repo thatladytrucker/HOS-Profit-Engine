@@ -74,31 +74,46 @@
 
     <!-- 2. THE VAULT -->
     <section class="glass rounded-3xl p-5 space-y-4">
-      <div class="flex items-center justify-between gap-3">
+      <div>
+        <p class="text-xs uppercase tracking-[.18em] text-slate-400 font-black">The Vault</p>
+        <h2 class="section-title">Norfolk-Based 2026 Boss Averages</h2>
+        <p class="small-note mt-1">These are editable. Change them when your real business costs are known.</p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <p class="text-xs uppercase tracking-[.18em] text-slate-400 font-black">The Vault</p>
-          <h2 class="section-title">Norfolk-Based 2026 Boss Averages</h2>
-          <p class="small-note mt-1">Change these numbers when your real business costs are known.</p>
+          <label class="label">Monthly Insurance ($)</label>
+          <input id="insurance" class="field" type="number" min="0" step="1" inputmode="decimal">
         </div>
-        <button onclick="toggleVault()" id="vaultBtn" class="rounded-xl border border-slate-600 px-4 py-3 font-black bg-slate-950">Edit</button>
+        <div>
+          <label class="label">Monthly Truck / Lease / Payment ($)</label>
+          <input id="lease" class="field" type="number" min="0" step="1" inputmode="decimal">
+        </div>
+        <div>
+          <label class="label">Other Fixed Costs / Month ($)</label>
+          <input id="otherFixed" class="field" type="number" min="0" step="1" inputmode="decimal">
+        </div>
+        <div>
+          <label class="label">Fuel Price / Gallon ($)</label>
+          <input id="fuelPrice" class="field" type="number" min="0" step="0.01" inputmode="decimal">
+        </div>
+        <div>
+          <label class="label">Average MPG</label>
+          <input id="mpg" class="field" type="number" min="1" step="0.1" inputmode="decimal">
+        </div>
+        <div>
+          <label class="label">Target Profit Per Load ($)</label>
+          <input id="targetProfit" class="field" type="number" min="0" step="1" inputmode="decimal">
+        </div>
       </div>
 
-      <div class="grid grid-cols-2 md:grid-cols-4 gap-3 text-center">
-        <div class="soft-card rounded-2xl p-3"><p class="small-note">Insurance / mo</p><p id="vaultInsuranceRead" class="font-black text-lg">$0</p></div>
-        <div class="soft-card rounded-2xl p-3"><p class="small-note">Truck / mo</p><p id="vaultLeaseRead" class="font-black text-lg">$0</p></div>
-        <div class="soft-card rounded-2xl p-3"><p class="small-note">Other / mo</p><p id="vaultOtherRead" class="font-black text-lg">$0</p></div>
-        <div class="soft-card rounded-2xl p-3"><p class="small-note">Fuel Base</p><p id="vaultFuelRead" class="font-black text-lg">$0</p></div>
-      </div>
-
-      <div id="vaultDrawer" class="drawer">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4">
-          <div><label class="label">Monthly Insurance ($)</label><input id="insurance" class="field" type="number" min="0" step="1"></div>
-          <div><label class="label">Monthly Truck / Lease / Payment ($)</label><input id="lease" class="field" type="number" min="0" step="1"></div>
-          <div><label class="label">Other Fixed Costs / Month ($)</label><input id="otherFixed" class="field" type="number" min="0" step="1"></div>
-          <div><label class="label">Fuel Price / Gallon ($)</label><input id="fuelPrice" class="field" type="number" min="0" step="0.01"></div>
-          <div><label class="label">Average MPG</label><input id="mpg" class="field" type="number" min="1" step="0.1"></div>
-          <div><label class="label">Target Profit Per Load ($)</label><input id="targetProfit" class="field" type="number" min="0" step="1"></div>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+        <div class="soft-card rounded-2xl p-4 text-center">
+          <p class="small-note">Current Weekly Nut</p>
+          <p id="vaultWeeklyNutRead" class="text-2xl font-black text-emerald-300">$0.00</p>
         </div>
+        <button onclick="saveVaultNow()" class="rounded-2xl bg-emerald-600 hover:bg-emerald-500 p-4 font-black active:scale-[.98]">Save Vault Numbers</button>
+        <button onclick="resetVaultDefaults()" class="rounded-2xl bg-slate-950 border border-slate-700 p-4 font-black active:scale-[.98]">Reset Vault Defaults</button>
       </div>
     </section>
 
@@ -244,11 +259,9 @@
     }
 
     function updateVaultReadouts(){
-      $('vaultInsuranceRead').innerText = money(state.insurance).replace('.00','');
-      $('vaultLeaseRead').innerText = money(state.lease).replace('.00','');
-      $('vaultOtherRead').innerText = money(state.otherFixed).replace('.00','');
-      $('vaultFuelRead').innerText = money(state.fuelPrice);
       $('weeklyNutTop').innerText = money(weeklyNut());
+      const weeklyRead = $('vaultWeeklyNutRead');
+      if(weeklyRead) weeklyRead.innerText = money(weeklyNut());
     }
 
     function calculate(){
@@ -367,10 +380,22 @@
       calculate();
     }
 
-    function toggleVault(){
-      const drawer = $('vaultDrawer');
-      drawer.classList.toggle('open');
-      $('vaultBtn').innerText = drawer.classList.contains('open') ? 'Close' : 'Edit';
+    function saveVaultNow(){
+      saveVaultFromInputsNoLoop();
+      calculate();
+      alert('Vault numbers saved.');
+    }
+
+    function resetVaultDefaults(){
+      if(confirm('Reset The Vault back to the starting averages?')){
+        ['insurance','lease','otherFixed','fuelPrice','mpg','targetProfit'].forEach(key => {
+          state[key] = defaults[key];
+          localStorage.setItem('hosProfit_' + key, defaults[key]);
+          $(key).value = defaults[key];
+        });
+        calculate();
+        alert('Vault defaults restored.');
+      }
     }
 
     function toggleStrategy(){
