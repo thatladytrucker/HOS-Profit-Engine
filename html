@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HOS Profit Engine</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="manifest" href="data:application/manifest+json,{%22name%22:%22HOS%20Profit%20Engine%22,%22short_name%22:%22HOSProfit%22,%22start_url%22:%22.%22,%22display%22:%22standalone%22,%22background_color%22:%22#111827%22,%22theme_color%22:%22#10B981%22}">
+</head>
+<body class="bg-gray-900 text-white font-sans min-h-screen p-4 pb-24">
+
+    <!-- 1. MISSION CONTROL: WEEKLY PROFIT STATUS -->
+    <header class="mb-6">
+        <h1 class="text-xl font-bold mb-2 text-emerald-400">Weekly Profit Goal</h1>
+        <div class="w-full bg-gray-800 rounded-full h-8 relative overflow-hidden border border-gray-700">
+            <div id="momentum-bar" class="bg-orange-500 h-full transition-all duration-500" style="width: 0%"></div>
+            <div class="absolute top-0 left-1/2 w-1 h-full bg-white opacity-30"></div>
+        </div>
+        <p id="momentum-text" class="text-sm mt-2 text-gray-400 text-center font-medium">Calculating progress...</p>
+    </header>
+
+    <!-- 2. THE LOAD DECK -->
+    <section class="space-y-4 bg-gray-800 p-4 rounded-xl shadow-lg border border-gray-700">
+        <div class="grid grid-cols-2 gap-4">
+            <div>
+                <label class="block text-xs uppercase font-bold text-gray-500 mb-1">Loaded Miles</label>
+                <input type="number" id="loaded-miles" min="0" class="w-full bg-gray-900 border border-gray-700 p-3 rounded text-xl focus:border-emerald-500 outline-none" placeholder="0">
+            </div>
+            <div>
+                <label class="block text-xs uppercase font-bold text-gray-500 mb-1">Deadhead</label>
+                <input type="number" id="deadhead-miles" min="0" class="w-full bg-gray-900 border border-gray-700 p-3 rounded text-xl focus:border-emerald-500 outline-none" placeholder="0">
+            </div>
+        </div>
+
+        <div>
+            <label class="block text-xs uppercase font-bold text-gray-500 mb-1">Broker Pay ($)</label>
+            <input type="number" id="gross-pay" min="0" step="0.01" class="w-full bg-gray-900 border border-gray-700 p-3 rounded text-2xl font-bold text-emerald-400 outline-none" placeholder="0.00">
+        </div>
+
+        <div class="grid grid-cols-2 gap-4 pt-2">
+            <button id="dispatch-toggle" onclick="toggle('dispatch')" class="p-3 rounded border border-gray-700 bg-gray-900 text-sm transition-colors">Dispatch (10%)</button>
+            <button id="high-tax-toggle" onclick="toggle('hightax')" class="p-3 rounded border border-gray-700 bg-gray-900 text-sm transition-colors">High-Tax IFTA</button>
+        </div>
+    </section>
+
+    <!-- 3. THE ENGINE ROOM -->
+    <section class="mt-6 text-center">
+        <div id="traffic-light" class="inline-block w-24 h-24 rounded-full bg-gray-800 border-4 border-gray-700 shadow-xl mb-4 transition-all duration-300"></div>
+        <h2 id="profit-result" class="text-3xl font-black italic tracking-tighter">Enter Load Data</h2>
+        
+        <div id="neg-assistant" class="mt-6 bg-red-900/30 border border-red-800 p-4 rounded-lg hidden">
+            <p class="text-red-400 font-bold mb-2">NEGOTIATION ASSISTANT</p>
+            <p id="counter-offer" class="text-sm mb-4"></p>
+            <button onclick="copyScript()" class="bg-red-600 text-white px-4 py-2 rounded text-xs font-bold uppercase active:bg-red-700">Copy Negotiation Script</button>
+        </div>
+    </section>
+
+    <button onclick="saveLoad()" class="fixed bottom-4 left-4 right-4 bg-emerald-600 hover:bg-emerald-500 p-4 rounded-xl font-bold text-lg shadow-2xl active:scale-95 transition-all">SAVE PROFIT TO WEEKLY PROGRESS</button>
+
+    <script>
+        // --- 1. STATE & VAULT ---
+        let state = {
+            insurance: 1400, 
+            lease: 2500,     
+            otherFixed: 300, 
+            dispatchActive: false,
+            highTaxActive: false,
+            currentProfit: 0,
+            weeklyProgress: parseFloat(localStorage.getItem('weeklyProgress')) || 0
+        };
+
+        const THE_NUT_WEEKLY = (state.insurance + state.lease + state.otherFixed) / 4.3;
+
+        // --- 2. THE ENGINE ---
+        function calculate() {
+            const loaded = parseFloat(document.getElementById('loaded-miles').value) || 0;
+            const deadhead = parseFloat(document.getElementById('deadhead-miles').value) || 0;
+            const gross = parseFloat(document.getElementById('gross-pay').value) || 0;
+            const totalMiles = loaded + deadhead;
+
+            const fuelCost = (totalMiles / 6.5) * 4.50; 
+            const iftaRate = state.highTaxActive ? 0.12 : 0.06;
+            const iftaReserve = totalMiles * iftaRate;
+            const dispatchFee = state.dispatchActive ? gross * 0.10 : 0;
+            const maintenance = totalMiles * 0.15;
+            const dailyNut = THE_NUT_WEEKLY / 5; 
+
+            const totalCosts = fuelCost + iftaReserve + dispatchFee + maintenance + dailyNut;
+            state.currentProfit = gross - totalCosts;
+
+            updateUI(state.currentProfit, totalCosts);
+        }
+
+        function updateUI(profit, costs) {
+            const light = document.getElementById('traffic-light');
+            const resultText = document.getElementById('profit-result');
+            const negBox = document.getElementById('neg-assistant');
+
+            if (profit > 0) {
+                light.className = "inline-block w-24 h-24 rounded-full bg-emerald-500 border-4 border-emerald-400 shadow-[0_0_20px_rgba(16,185,129,0.5)] mb-4";
+                resultText.innerText = `+$${profit.toFixed(2)} PROFIT`;
+                resultText.className = "text-3xl font-black italic text-emerald-400";
+                negBox.classList.add('hidden');
+            } else {
+                light.className = "inline-block w-24 h-24 rounded-full bg-red-600 border-4 border-red-500 shadow-[0_0_20px_rgba(220,38,38,0.5)] mb-4";
+                resultText.innerText = `$${profit.toFixed(2)} LOSS`;
+                resultText.className = "text-3xl font-black italic text-red-500";
+                
+                const breakEven = costs.toFixed(2);
+                document.getElementById('counter-offer').innerText = `To break even on this load, you must ask for at least $${breakEven}.`;
+                negBox.classList.remove('hidden');
+            }
+            updateMomentum();
+        }
+
+        function updateMomentum() {
+            const bar = document.getElementById('momentum-bar');
+            const text = document.getElementById('momentum-text');
+            const percent = (state.weeklyProgress / THE_NUT_WEEKLY) * 100;
+            
+            bar.style.width = Math.min(percent, 100) + "%";
+            if (percent >= 100) {
+                bar.className = "bg-emerald-500 h-full transition-all duration-500 shadow-[0_0_15px_#10B981]";
+                text.innerText = "PROFIT ZONE: Bills are paid for the week!";
+            } else {
+                text.innerText = `$${(THE_NUT_WEEKLY - state.weeklyProgress).toFixed(2)} to cover "The Nut"`;
+            }
+        }
+
+        function toggle(type) {
+            if (type === 'dispatch') state.dispatchActive = !state.dispatchActive;
+            if (type === 'hightax') state.highTaxActive = !state.highTaxActive;
+            
+            document.getElementById('dispatch-toggle').className = state.dispatchActive ? "p-3 rounded bg-emerald-600 border border-emerald-400 text-sm" : "p-3 rounded border border-gray-700 bg-gray-900 text-sm";
+            document.getElementById('high-tax-toggle').className = state.highTaxActive ? "p-3 rounded bg-emerald-600 border border-emerald-400 text-sm" : "p-3 rounded border border-gray-700 bg-gray-900 text-sm";
+            calculate();
+        }
+
+        function saveLoad() {
+            const gross = parseFloat(document.getElementById('gross-pay').value) || 0;
+
+            if (gross <= 0) {
+                alert("Enter the broker pay before saving.");
+                return;
+            }
+
+            if (state.currentProfit <= 0) {
+                alert("This load is not a win yet. Fix the rate before saving.");
+                return;
+            }
+
+            state.weeklyProgress += state.currentProfit;
+            localStorage.setItem('weeklyProgress', state.weeklyProgress);
+            updateMomentum();
+            alert("Profit saved to weekly progress!");
+        }
+
+        function copyScript() {
+            const ask = (state.currentProfit < 0) ? (state.currentProfit * -1 + parseFloat(document.getElementById('gross-pay').value)).toFixed(2) : document.getElementById('gross-pay').value;
+            const text = `I'm at $${ask} on this lane to cover my overhead and regional fuel taxes. Can we make that work?`;
+            navigator.clipboard.writeText(text);
+            alert("Script copied!");
+        }
+
+        document.querySelectorAll('input').forEach(input => input.addEventListener('input', calculate));
+        
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW Error:', err));
+        }
+    </script>
+</body>
+</html>
