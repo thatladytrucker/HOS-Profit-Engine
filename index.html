@@ -1,172 +1,434 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HOS Profit Engine</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="manifest" href="data:application/manifest+json,{%22name%22:%22HOS%20Profit%20Engine%22,%22short_name%22:%22HOSProfit%22,%22start_url%22:%22.%22,%22display%22:%22standalone%22,%22background_color%22:%22#111827%22,%22theme_color%22:%22#10B981%22}">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HOS Profit Engine</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="manifest" href="data:application/manifest+json,{%22name%22:%22HOS%20Profit%20Engine%22,%22short_name%22:%22HOSProfit%22,%22start_url%22:%22.%22,%22display%22:%22standalone%22,%22background_color%22:%22#08111f%22,%22theme_color%22:%22#10B981%22}">
+  <style>
+    :root{
+      --bg:#08111f;
+      --panel:#111c2c;
+      --panel2:#162235;
+      --line:#2c3a50;
+      --muted:#94a3b8;
+      --green:#10b981;
+      --orange:#f59e0b;
+      --red:#ef4444;
+      --yellow:#eab308;
+    }
+    html{scroll-behavior:smooth;}
+    body{background:radial-gradient(circle at top,#122033 0%,#08111f 45%,#050a13 100%);}
+    input[type="number"]::-webkit-inner-spin-button,
+    input[type="number"]::-webkit-outer-spin-button{opacity:1;}
+    .glass{background:rgba(17,28,44,.92); border:1px solid rgba(148,163,184,.18); box-shadow:0 18px 40px rgba(0,0,0,.28);}
+    .soft-card{background:rgba(22,34,53,.95); border:1px solid rgba(148,163,184,.18);}
+    .field{width:100%; background:#071020; border:1px solid #334155; border-radius:14px; padding:14px 14px; color:white; outline:none; font-size:1.2rem;}
+    .field:focus{border-color:#10b981; box-shadow:0 0 0 3px rgba(16,185,129,.15);}
+    .label{display:block; color:#94a3b8; text-transform:uppercase; font-weight:800; letter-spacing:.06em; font-size:.74rem; margin-bottom:7px;}
+    .toggle{background:#071020; border:1px solid #334155; border-radius:16px; padding:14px 12px; font-weight:800; min-height:58px; transition:.2s ease;}
+    .toggle.active{background:linear-gradient(135deg,#059669,#10b981); border-color:#6ee7b7; color:white; box-shadow:0 0 22px rgba(16,185,129,.20);}
+    .toggle.warn.active{background:linear-gradient(135deg,#b45309,#f59e0b); border-color:#fcd34d;}
+    .toggle.red.active{background:linear-gradient(135deg,#b91c1c,#ef4444); border-color:#fca5a5;}
+    .section-title{font-size:1.28rem; font-weight:900; color:#34d399; letter-spacing:-.02em;}
+    .small-note{color:#94a3b8; font-size:.86rem; line-height:1.35rem;}
+    .drawer{max-height:0; overflow:hidden; transition:max-height .35s ease;}
+    .drawer.open{max-height:900px;}
+  </style>
 </head>
-<body class="bg-gray-900 text-white font-sans min-h-screen p-4 pb-24">
+<body class="text-white font-sans min-h-screen pb-28">
+  <main class="max-w-4xl mx-auto p-4 space-y-5">
 
-    <!-- 1. MISSION CONTROL: WEEKLY PROFIT STATUS -->
-    <header class="mb-6">
-        <h1 class="text-xl font-bold mb-2 text-emerald-400">Weekly Profit Goal</h1>
-        <div class="w-full bg-gray-800 rounded-full h-8 relative overflow-hidden border border-gray-700">
-            <div id="momentum-bar" class="bg-orange-500 h-full transition-all duration-500" style="width: 0%"></div>
-            <div class="absolute top-0 left-1/2 w-1 h-full bg-white opacity-30"></div>
+    <!-- 1. DASHBOARD / MISSION CONTROL -->
+    <header class="glass rounded-3xl p-5 space-y-4">
+      <div class="flex items-start justify-between gap-3">
+        <div>
+          <p class="text-xs uppercase tracking-[.18em] text-slate-400 font-black">Mission Control</p>
+          <h1 class="text-3xl font-black text-emerald-400 leading-tight">HOS Profit Engine</h1>
+          <p class="small-note mt-1">Quick load check for owner-operator rate confidence.</p>
         </div>
-        <p id="momentum-text" class="text-sm mt-2 text-gray-400 text-center font-medium">Calculating progress...</p>
+        <div class="text-right">
+          <p class="text-xs uppercase text-slate-400 font-bold">Weekly Nut</p>
+          <p id="weeklyNutTop" class="text-xl font-black">$0.00</p>
+        </div>
+      </div>
+
+      <div>
+        <div class="flex justify-between text-xs text-slate-400 font-bold mb-2">
+          <span>$0</span>
+          <span>Profit Zone</span>
+        </div>
+        <div class="w-full bg-slate-800 rounded-full h-9 relative overflow-hidden border border-slate-700">
+          <div id="momentumBar" class="h-full bg-orange-500 transition-all duration-500" style="width:0%"></div>
+          <div class="absolute top-0 left-1/2 w-1 h-full bg-white/30"></div>
+        </div>
+        <p id="momentumText" class="text-center text-slate-300 font-bold mt-3">Loading weekly progress...</p>
+      </div>
+
+      <div class="grid grid-cols-2 gap-3">
+        <button onclick="resetLoadOnly()" class="rounded-2xl bg-slate-950 border border-slate-700 p-4 font-black active:scale-[.98]">New Load Check</button>
+        <button onclick="openHosClock()" class="rounded-2xl bg-slate-950 border border-slate-700 p-4 font-black active:scale-[.98]">HOS Clock</button>
+      </div>
     </header>
 
-    <!-- 2. THE LOAD DECK -->
-    <section class="space-y-4 bg-gray-800 p-4 rounded-xl shadow-lg border border-gray-700">
-        <div class="grid grid-cols-2 gap-4">
-            <div>
-                <label class="block text-xs uppercase font-bold text-gray-500 mb-1">Loaded Miles</label>
-                <input type="number" id="loaded-miles" min="0" class="w-full bg-gray-900 border border-gray-700 p-3 rounded text-xl focus:border-emerald-500 outline-none" placeholder="0">
-            </div>
-            <div>
-                <label class="block text-xs uppercase font-bold text-gray-500 mb-1">Deadhead</label>
-                <input type="number" id="deadhead-miles" min="0" class="w-full bg-gray-900 border border-gray-700 p-3 rounded text-xl focus:border-emerald-500 outline-none" placeholder="0">
-            </div>
-        </div>
-
+    <!-- 2. THE VAULT -->
+    <section class="glass rounded-3xl p-5 space-y-4">
+      <div class="flex items-center justify-between gap-3">
         <div>
-            <label class="block text-xs uppercase font-bold text-gray-500 mb-1">Broker Pay ($)</label>
-            <input type="number" id="gross-pay" min="0" step="0.01" class="w-full bg-gray-900 border border-gray-700 p-3 rounded text-2xl font-bold text-emerald-400 outline-none" placeholder="0.00">
+          <p class="text-xs uppercase tracking-[.18em] text-slate-400 font-black">The Vault</p>
+          <h2 class="section-title">Norfolk-Based 2026 Boss Averages</h2>
+          <p class="small-note mt-1">Change these numbers when your real business costs are known.</p>
         </div>
+        <button onclick="toggleVault()" id="vaultBtn" class="rounded-xl border border-slate-600 px-4 py-3 font-black bg-slate-950">Edit</button>
+      </div>
 
-        <div class="grid grid-cols-2 gap-4 pt-2">
-            <button id="dispatch-toggle" onclick="toggle('dispatch')" class="p-3 rounded border border-gray-700 bg-gray-900 text-sm transition-colors">Dispatch (10%)</button>
-            <button id="high-tax-toggle" onclick="toggle('hightax')" class="p-3 rounded border border-gray-700 bg-gray-900 text-sm transition-colors">High-Tax IFTA</button>
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-3 text-center">
+        <div class="soft-card rounded-2xl p-3"><p class="small-note">Insurance / mo</p><p id="vaultInsuranceRead" class="font-black text-lg">$0</p></div>
+        <div class="soft-card rounded-2xl p-3"><p class="small-note">Truck / mo</p><p id="vaultLeaseRead" class="font-black text-lg">$0</p></div>
+        <div class="soft-card rounded-2xl p-3"><p class="small-note">Other / mo</p><p id="vaultOtherRead" class="font-black text-lg">$0</p></div>
+        <div class="soft-card rounded-2xl p-3"><p class="small-note">Fuel Base</p><p id="vaultFuelRead" class="font-black text-lg">$0</p></div>
+      </div>
+
+      <div id="vaultDrawer" class="drawer">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4">
+          <div><label class="label">Monthly Insurance ($)</label><input id="insurance" class="field" type="number" min="0" step="1"></div>
+          <div><label class="label">Monthly Truck / Lease / Payment ($)</label><input id="lease" class="field" type="number" min="0" step="1"></div>
+          <div><label class="label">Other Fixed Costs / Month ($)</label><input id="otherFixed" class="field" type="number" min="0" step="1"></div>
+          <div><label class="label">Fuel Price / Gallon ($)</label><input id="fuelPrice" class="field" type="number" min="0" step="0.01"></div>
+          <div><label class="label">Average MPG</label><input id="mpg" class="field" type="number" min="1" step="0.1"></div>
+          <div><label class="label">Target Profit Per Load ($)</label><input id="targetProfit" class="field" type="number" min="0" step="1"></div>
         </div>
+      </div>
     </section>
 
-    <!-- 3. THE ENGINE ROOM -->
-    <section class="mt-6 text-center">
-        <div id="traffic-light" class="inline-block w-24 h-24 rounded-full bg-gray-800 border-4 border-gray-700 shadow-xl mb-4 transition-all duration-300"></div>
-        <h2 id="profit-result" class="text-3xl font-black italic tracking-tighter">Enter Load Data</h2>
-        
-        <div id="neg-assistant" class="mt-6 bg-red-900/30 border border-red-800 p-4 rounded-lg hidden">
-            <p class="text-red-400 font-bold mb-2">NEGOTIATION ASSISTANT</p>
-            <p id="counter-offer" class="text-sm mb-4"></p>
-            <button onclick="copyScript()" class="bg-red-600 text-white px-4 py-2 rounded text-xs font-bold uppercase active:bg-red-700">Copy Negotiation Script</button>
-        </div>
+    <!-- 3. THE LOAD DECK -->
+    <section class="glass rounded-3xl p-5 space-y-5">
+      <div>
+        <p class="text-xs uppercase tracking-[.18em] text-slate-400 font-black">The Load Deck</p>
+        <h2 class="section-title">Load Feasibility</h2>
+        <p class="small-note mt-1">Separate loaded miles from deadhead so hidden costs show up before you accept the rate.</p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div><label class="label">Loaded Miles</label><input id="loadedMiles" class="field" type="number" min="0" placeholder="0"></div>
+        <div><label class="label">Deadhead Miles</label><input id="deadheadMiles" class="field" type="number" min="0" placeholder="0"></div>
+        <div><label class="label">Broker Pay ($)</label><input id="grossPay" class="field text-emerald-300 font-black" type="number" min="0" step="0.01" placeholder="0.00"></div>
+      </div>
+
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <button id="tarpToggle" onclick="toggleOption('tarp')" class="toggle">Tarp / Labor</button>
+        <button id="dispatchToggle" onclick="toggleOption('dispatch')" class="toggle">Dispatch 10%</button>
+        <button id="highTaxToggle" onclick="toggleOption('highTax')" class="toggle warn">High-Tax IFTA</button>
+        <button id="safeHavenToggle" onclick="toggleOption('safeHaven')" class="toggle active">Safe Haven +50 mi</button>
+      </div>
+
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-3 text-center">
+        <div class="soft-card rounded-2xl p-3"><p class="small-note">Total Miles</p><p id="totalMilesRead" class="font-black text-xl">0</p></div>
+        <div class="soft-card rounded-2xl p-3"><p class="small-note">Rate / Mile</p><p id="rpmRead" class="font-black text-xl">$0.00</p></div>
+        <div class="soft-card rounded-2xl p-3"><p class="small-note">Safe Miles</p><p id="safeMilesRead" class="font-black text-xl">0</p></div>
+        <div class="soft-card rounded-2xl p-3"><p class="small-note">Net After Cost</p><p id="netRead" class="font-black text-xl">$0.00</p></div>
+      </div>
     </section>
 
-    <button onclick="saveLoad()" class="fixed bottom-4 left-4 right-4 bg-emerald-600 hover:bg-emerald-500 p-4 rounded-xl font-bold text-lg shadow-2xl active:scale-95 transition-all">SAVE PROFIT TO WEEKLY PROGRESS</button>
+    <!-- 4. ENGINE ROOM -->
+    <section class="glass rounded-3xl p-5 text-center space-y-5">
+      <div>
+        <p class="text-xs uppercase tracking-[.18em] text-slate-400 font-black">The Engine Room</p>
+        <h2 class="section-title">Decision & Negotiation</h2>
+      </div>
 
-    <script>
-        // --- 1. STATE & VAULT ---
-        let state = {
-            insurance: 1400, 
-            lease: 2500,     
-            otherFixed: 300, 
-            dispatchActive: false,
-            highTaxActive: false,
-            currentProfit: 0,
-            weeklyProgress: parseFloat(localStorage.getItem('weeklyProgress')) || 0
-        };
+      <div id="trafficLight" class="mx-auto w-28 h-28 rounded-full bg-slate-700 border-4 border-slate-500 shadow-xl transition-all duration-300"></div>
+      <h3 id="decisionText" class="text-4xl font-black italic tracking-tight">Enter Load Data</h3>
+      <p id="decisionSubtext" class="small-note text-center max-w-xl mx-auto">The light changes after you enter miles and broker pay.</p>
 
-        const THE_NUT_WEEKLY = (state.insurance + state.lease + state.otherFixed) / 4.3;
+      <div id="negAssistant" class="hidden rounded-3xl border border-red-500 bg-red-950/35 p-5 space-y-3">
+        <p class="text-red-300 font-black text-xl">NEGOTIATION ASSISTANT</p>
+        <p id="counterOffer" class="text-lg"></p>
+        <button onclick="copyScript()" class="rounded-xl bg-red-600 hover:bg-red-500 px-5 py-3 font-black active:scale-[.98]">Copy Negotiation Script</button>
+      </div>
 
-        // --- 2. THE ENGINE ---
-        function calculate() {
-            const loaded = parseFloat(document.getElementById('loaded-miles').value) || 0;
-            const deadhead = parseFloat(document.getElementById('deadhead-miles').value) || 0;
-            const gross = parseFloat(document.getElementById('gross-pay').value) || 0;
-            const totalMiles = loaded + deadhead;
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-left">
+        <div class="soft-card rounded-2xl p-4"><p class="small-note">Break-Even Ask</p><p id="breakEvenRead" class="text-2xl font-black">$0.00</p></div>
+        <div class="soft-card rounded-2xl p-4"><p class="small-note">Profit Goal Ask</p><p id="profitGoalRead" class="text-2xl font-black">$0.00</p></div>
+        <div class="soft-card rounded-2xl p-4"><p class="small-note">Load Status</p><p id="loadStatusRead" class="text-2xl font-black">Waiting</p></div>
+      </div>
+    </section>
 
-            const fuelCost = (totalMiles / 6.5) * 4.50; 
-            const iftaRate = state.highTaxActive ? 0.12 : 0.06;
-            const iftaReserve = totalMiles * iftaRate;
-            const dispatchFee = state.dispatchActive ? gross * 0.10 : 0;
-            const maintenance = totalMiles * 0.15;
-            const dailyNut = THE_NUT_WEEKLY / 5; 
+    <!-- 5. STRATEGY REVEAL -->
+    <section class="glass rounded-3xl p-5 space-y-4">
+      <button onclick="toggleStrategy()" class="w-full flex items-center justify-between text-left">
+        <div>
+          <p class="text-xs uppercase tracking-[.18em] text-slate-400 font-black">Strategy Reveal</p>
+          <h2 class="section-title">Safe Haven Fuel & IFTA Reserve</h2>
+        </div>
+        <span id="strategyArrow" class="text-3xl font-black">+</span>
+      </button>
 
-            const totalCosts = fuelCost + iftaReserve + dispatchFee + maintenance + dailyNut;
-            state.currentProfit = gross - totalCosts;
+      <div id="strategyDrawer" class="drawer">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 pt-4">
+          <div class="soft-card rounded-2xl p-4"><p class="small-note">Fuel Cost</p><p id="fuelCostRead" class="text-2xl font-black">$0.00</p></div>
+          <div class="soft-card rounded-2xl p-4"><p class="small-note">IFTA Reserve</p><p id="iftaRead" class="text-2xl font-black">$0.00</p></div>
+          <div class="soft-card rounded-2xl p-4"><p class="small-note">Maintenance Reserve</p><p id="maintRead" class="text-2xl font-black">$0.00</p></div>
+          <div class="soft-card rounded-2xl p-4"><p class="small-note">Dispatch / Tarp / Daily Nut</p><p id="extraCostRead" class="text-2xl font-black">$0.00</p></div>
+        </div>
+        <p class="small-note mt-4">This tool is planning support only. Confirm taxes, fuel, HOS, tolls, permits, and load requirements before accepting freight.</p>
+      </div>
+    </section>
+  </main>
 
-            updateUI(state.currentProfit, totalCosts);
-        }
+  <div class="fixed bottom-0 left-0 right-0 bg-slate-950/95 border-t border-slate-800 p-4">
+    <div class="max-w-4xl mx-auto grid grid-cols-2 gap-3">
+      <button onclick="saveLoad()" class="rounded-2xl bg-emerald-600 hover:bg-emerald-500 p-4 font-black text-lg active:scale-[.98]">Save Win</button>
+      <button onclick="resetWeek()" class="rounded-2xl bg-slate-800 border border-slate-600 p-4 font-black text-lg active:scale-[.98]">Reset Week</button>
+    </div>
+  </div>
 
-        function updateUI(profit, costs) {
-            const light = document.getElementById('traffic-light');
-            const resultText = document.getElementById('profit-result');
-            const negBox = document.getElementById('neg-assistant');
+  <script>
+    const $ = (id) => document.getElementById(id);
 
-            if (profit > 0) {
-                light.className = "inline-block w-24 h-24 rounded-full bg-emerald-500 border-4 border-emerald-400 shadow-[0_0_20px_rgba(16,185,129,0.5)] mb-4";
-                resultText.innerText = `+$${profit.toFixed(2)} PROFIT`;
-                resultText.className = "text-3xl font-black italic text-emerald-400";
-                negBox.classList.add('hidden');
-            } else {
-                light.className = "inline-block w-24 h-24 rounded-full bg-red-600 border-4 border-red-500 shadow-[0_0_20px_rgba(220,38,38,0.5)] mb-4";
-                resultText.innerText = `$${profit.toFixed(2)} LOSS`;
-                resultText.className = "text-3xl font-black italic text-red-500";
-                
-                const breakEven = costs.toFixed(2);
-                document.getElementById('counter-offer').innerText = `To break even on this load, you must ask for at least $${breakEven}.`;
-                negBox.classList.remove('hidden');
-            }
-            updateMomentum();
-        }
+    const defaults = {
+      insurance: 1400,
+      lease: 2500,
+      otherFixed: 300,
+      fuelPrice: 4.50,
+      mpg: 6.5,
+      targetProfit: 250,
+      tarpFee: 150,
+      iftaNormal: 0.06,
+      iftaHigh: 0.12,
+      maintenanceRate: 0.15,
+      safeHavenMiles: 50,
+      workDaysPerWeek: 5
+    };
 
-        function updateMomentum() {
-            const bar = document.getElementById('momentum-bar');
-            const text = document.getElementById('momentum-text');
-            const percent = (state.weeklyProgress / THE_NUT_WEEKLY) * 100;
-            
-            bar.style.width = Math.min(percent, 100) + "%";
-            if (percent >= 100) {
-                bar.className = "bg-emerald-500 h-full transition-all duration-500 shadow-[0_0_15px_#10B981]";
-                text.innerText = "PROFIT ZONE: Bills are paid for the week!";
-            } else {
-                text.innerText = `$${(THE_NUT_WEEKLY - state.weeklyProgress).toFixed(2)} to cover "The Nut"`;
-            }
-        }
+    let state = {
+      ...defaults,
+      tarp: false,
+      dispatch: false,
+      highTax: false,
+      safeHaven: true,
+      currentProfit: 0,
+      breakEven: 0,
+      profitGoalAsk: 0,
+      weeklyProgress: parseFloat(localStorage.getItem('hosProfitWeeklyProgress') || '0')
+    };
 
-        function toggle(type) {
-            if (type === 'dispatch') state.dispatchActive = !state.dispatchActive;
-            if (type === 'hightax') state.highTaxActive = !state.highTaxActive;
-            
-            document.getElementById('dispatch-toggle').className = state.dispatchActive ? "p-3 rounded bg-emerald-600 border border-emerald-400 text-sm" : "p-3 rounded border border-gray-700 bg-gray-900 text-sm";
-            document.getElementById('high-tax-toggle').className = state.highTaxActive ? "p-3 rounded bg-emerald-600 border border-emerald-400 text-sm" : "p-3 rounded border border-gray-700 bg-gray-900 text-sm";
-            calculate();
-        }
+    function money(n){ return '$' + (Number(n) || 0).toFixed(2); }
+    function num(id){ return parseFloat($(id).value) || 0; }
 
-        function saveLoad() {
-            const gross = parseFloat(document.getElementById('gross-pay').value) || 0;
+    function weeklyNut(){
+      return (state.insurance + state.lease + state.otherFixed) / 4.3;
+    }
 
-            if (gross <= 0) {
-                alert("Enter the broker pay before saving.");
-                return;
-            }
+    function dailyNut(){
+      return weeklyNut() / state.workDaysPerWeek;
+    }
 
-            if (state.currentProfit <= 0) {
-                alert("This load is not a win yet. Fix the rate before saving.");
-                return;
-            }
+    function loadVault(){
+      ['insurance','lease','otherFixed','fuelPrice','mpg','targetProfit'].forEach(key => {
+        const saved = localStorage.getItem('hosProfit_' + key);
+        state[key] = saved === null ? defaults[key] : parseFloat(saved);
+        $(key).value = state[key];
+      });
+      updateVaultReadouts();
+    }
 
-            state.weeklyProgress += state.currentProfit;
-            localStorage.setItem('weeklyProgress', state.weeklyProgress);
-            updateMomentum();
-            alert("Profit saved to weekly progress!");
-        }
+    function saveVaultFromInputs(){
+      ['insurance','lease','otherFixed','fuelPrice','mpg','targetProfit'].forEach(key => {
+        state[key] = num(key);
+        localStorage.setItem('hosProfit_' + key, state[key]);
+      });
+      updateVaultReadouts();
+      calculate();
+    }
 
-        function copyScript() {
-            const ask = (state.currentProfit < 0) ? (state.currentProfit * -1 + parseFloat(document.getElementById('gross-pay').value)).toFixed(2) : document.getElementById('gross-pay').value;
-            const text = `I'm at $${ask} on this lane to cover my overhead and regional fuel taxes. Can we make that work?`;
-            navigator.clipboard.writeText(text);
-            alert("Script copied!");
-        }
+    function updateVaultReadouts(){
+      $('vaultInsuranceRead').innerText = money(state.insurance).replace('.00','');
+      $('vaultLeaseRead').innerText = money(state.lease).replace('.00','');
+      $('vaultOtherRead').innerText = money(state.otherFixed).replace('.00','');
+      $('vaultFuelRead').innerText = money(state.fuelPrice);
+      $('weeklyNutTop').innerText = money(weeklyNut());
+    }
 
-        document.querySelectorAll('input').forEach(input => input.addEventListener('input', calculate));
-        
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW Error:', err));
-        }
-    </script>
+    function calculate(){
+      saveVaultFromInputsNoLoop();
+
+      const loaded = num('loadedMiles');
+      const deadhead = num('deadheadMiles');
+      const gross = num('grossPay');
+      const enteredMiles = loaded + deadhead;
+      const safeMiles = enteredMiles + (state.safeHaven && enteredMiles > 0 ? state.safeHavenMiles : 0);
+      const rpm = enteredMiles > 0 ? gross / enteredMiles : 0;
+
+      const fuelCost = state.mpg > 0 ? (safeMiles / state.mpg) * state.fuelPrice : 0;
+      const iftaRate = state.highTax ? state.iftaHigh : state.iftaNormal;
+      const iftaReserve = safeMiles * iftaRate;
+      const maintenance = safeMiles * state.maintenanceRate;
+      const dispatchFee = state.dispatch ? gross * 0.10 : 0;
+      const tarpCost = state.tarp ? state.tarpFee : 0;
+      const fixedDay = enteredMiles > 0 ? dailyNut() : 0;
+
+      const totalCosts = fuelCost + iftaReserve + maintenance + dispatchFee + tarpCost + fixedDay;
+      state.currentProfit = gross - totalCosts;
+      state.breakEven = totalCosts;
+      state.profitGoalAsk = totalCosts + state.targetProfit;
+
+      $('totalMilesRead').innerText = enteredMiles.toFixed(0);
+      $('safeMilesRead').innerText = safeMiles.toFixed(0);
+      $('rpmRead').innerText = money(rpm);
+      $('netRead').innerText = money(state.currentProfit);
+      $('breakEvenRead').innerText = money(state.breakEven);
+      $('profitGoalRead').innerText = money(state.profitGoalAsk);
+      $('fuelCostRead').innerText = money(fuelCost);
+      $('iftaRead').innerText = money(iftaReserve);
+      $('maintRead').innerText = money(maintenance);
+      $('extraCostRead').innerText = money(dispatchFee + tarpCost + fixedDay);
+
+      updateDecision(gross, enteredMiles);
+      updateMomentum();
+    }
+
+    function saveVaultFromInputsNoLoop(){
+      ['insurance','lease','otherFixed','fuelPrice','mpg','targetProfit'].forEach(key => {
+        const value = num(key);
+        state[key] = value;
+        localStorage.setItem('hosProfit_' + key, value);
+      });
+      updateVaultReadouts();
+    }
+
+    function updateDecision(gross, enteredMiles){
+      const light = $('trafficLight');
+      const decision = $('decisionText');
+      const sub = $('decisionSubtext');
+      const neg = $('negAssistant');
+      const status = $('loadStatusRead');
+
+      if(gross <= 0 || enteredMiles <= 0){
+        light.className = 'mx-auto w-28 h-28 rounded-full bg-slate-700 border-4 border-slate-500 shadow-xl transition-all duration-300';
+        decision.innerText = 'Enter Load Data';
+        decision.className = 'text-4xl font-black italic tracking-tight text-white';
+        sub.innerText = 'Enter miles and broker pay to check the load.';
+        neg.classList.add('hidden');
+        status.innerText = 'Waiting';
+        return;
+      }
+
+      if(state.currentProfit >= state.targetProfit){
+        light.className = 'mx-auto w-28 h-28 rounded-full bg-emerald-500 border-4 border-emerald-300 shadow-[0_0_35px_rgba(16,185,129,.65)] transition-all duration-300';
+        decision.innerText = '+' + money(state.currentProfit) + ' PROFIT';
+        decision.className = 'text-4xl font-black italic tracking-tight text-emerald-300';
+        sub.innerText = 'Green light: this load clears costs and reaches your target profit.';
+        neg.classList.add('hidden');
+        status.innerText = 'GREEN';
+      } else if(state.currentProfit >= 0){
+        light.className = 'mx-auto w-28 h-28 rounded-full bg-yellow-400 border-4 border-yellow-200 shadow-[0_0_35px_rgba(234,179,8,.55)] transition-all duration-300';
+        decision.innerText = '+' + money(state.currentProfit) + ' THIN PROFIT';
+        decision.className = 'text-4xl font-black italic tracking-tight text-yellow-300';
+        sub.innerText = 'Yellow light: it covers costs, but does not hit the profit goal.';
+        $('counterOffer').innerText = 'To hit your profit goal, ask for at least ' + money(state.profitGoalAsk) + '.';
+        neg.classList.remove('hidden');
+        status.innerText = 'YELLOW';
+      } else {
+        light.className = 'mx-auto w-28 h-28 rounded-full bg-red-600 border-4 border-red-400 shadow-[0_0_35px_rgba(239,68,68,.65)] transition-all duration-300';
+        decision.innerText = '-' + money(Math.abs(state.currentProfit)) + ' LOSS';
+        decision.className = 'text-4xl font-black italic tracking-tight text-red-400';
+        sub.innerText = 'Red light: this rate does not cover the calculated cost stack.';
+        $('counterOffer').innerText = 'To break even, ask for at least ' + money(state.breakEven) + '. To hit the profit goal, ask for ' + money(state.profitGoalAsk) + '.';
+        neg.classList.remove('hidden');
+        status.innerText = 'RED';
+      }
+    }
+
+    function updateMomentum(){
+      const nut = weeklyNut();
+      const pct = nut > 0 ? (state.weeklyProgress / nut) * 100 : 0;
+      $('momentumBar').style.width = Math.min(Math.max(pct,0),100) + '%';
+
+      if(pct >= 100){
+        $('momentumBar').className = 'h-full bg-emerald-500 transition-all duration-500 shadow-[0_0_20px_#10b981]';
+        $('momentumText').innerText = 'PROFIT ZONE: weekly fixed costs are covered.';
+      } else {
+        $('momentumBar').className = 'h-full bg-orange-500 transition-all duration-500';
+        $('momentumText').innerText = money(nut - state.weeklyProgress) + ' to cover The Nut';
+      }
+    }
+
+    function toggleOption(type){
+      state[type] = !state[type];
+      const map = {
+        tarp:'tarpToggle',
+        dispatch:'dispatchToggle',
+        highTax:'highTaxToggle',
+        safeHaven:'safeHavenToggle'
+      };
+      $(map[type]).classList.toggle('active', state[type]);
+      calculate();
+    }
+
+    function toggleVault(){
+      const drawer = $('vaultDrawer');
+      drawer.classList.toggle('open');
+      $('vaultBtn').innerText = drawer.classList.contains('open') ? 'Close' : 'Edit';
+    }
+
+    function toggleStrategy(){
+      const drawer = $('strategyDrawer');
+      drawer.classList.toggle('open');
+      $('strategyArrow').innerText = drawer.classList.contains('open') ? '–' : '+';
+    }
+
+    function saveLoad(){
+      const gross = num('grossPay');
+      const miles = num('loadedMiles') + num('deadheadMiles');
+      if(gross <= 0 || miles <= 0){
+        alert('Enter loaded/deadhead miles and broker pay before saving.');
+        return;
+      }
+      if(state.currentProfit <= 0){
+        alert('This load is not profitable yet. Use the negotiation number before saving.');
+        return;
+      }
+      state.weeklyProgress += state.currentProfit;
+      localStorage.setItem('hosProfitWeeklyProgress', state.weeklyProgress);
+      updateMomentum();
+      alert('Profit saved to weekly progress.');
+    }
+
+    function resetLoadOnly(){
+      ['loadedMiles','deadheadMiles','grossPay'].forEach(id => $(id).value = '');
+      state.currentProfit = 0;
+      calculate();
+      window.scrollTo({top:0, behavior:'smooth'});
+    }
+
+    function resetWeek(){
+      if(confirm('Reset weekly progress to $0?')){
+        state.weeklyProgress = 0;
+        localStorage.setItem('hosProfitWeeklyProgress', '0');
+        updateMomentum();
+      }
+    }
+
+    function copyScript(){
+      const ask = state.currentProfit < 0 ? state.profitGoalAsk : state.profitGoalAsk;
+      const text = 'I need to be at ' + money(ask) + ' on this lane to cover current overhead, fuel, IFTA reserve, maintenance, and safe-haven miles. Can we make that work?';
+      navigator.clipboard.writeText(text).then(() => alert('Negotiation script copied.'));
+    }
+
+    function openHosClock(){
+      alert('HOS Clock button is reserved for your next screen/link. We can connect it to your HOS calculator later.');
+    }
+
+    document.querySelectorAll('input').forEach(input => input.addEventListener('input', calculate));
+
+    loadVault();
+    calculate();
+
+    if('serviceWorker' in navigator){
+      navigator.serviceWorker.register('./sw.js').catch(() => console.log('Service worker not active yet.'));
+    }
+  </script>
 </body>
 </html>
