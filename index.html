@@ -167,7 +167,12 @@
         <p id="counterOffer" class="text-lg"></p>
         <button onclick="copyScript()" class="rounded-xl bg-red-600 hover:bg-red-500 px-5 py-3 font-black active:scale-[.98]">Copy Negotiation Script</button>
       </div>
-
+     <button
+  id="settlementReviewBtn"
+  onclick="openSettlementReview()"
+  class="hidden w-full rounded-2xl bg-emerald-600 hover:bg-emerald-500 p-4 font-black text-lg active:scale-[.98]">
+  View Estimated Settlement
+</button>
       <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-left">
         <div class="soft-card rounded-2xl p-4"><p class="small-note">Break-Even Ask</p><p id="breakEvenRead" class="text-2xl font-black">$0.00</p></div>
         <div class="soft-card rounded-2xl p-4"><p class="small-note">Profit Goal Ask</p><p id="profitGoalRead" class="text-2xl font-black">$0.00</p></div>
@@ -329,13 +334,14 @@
       const sub = $('decisionSubtext');
       const neg = $('negAssistant');
       const status = $('loadStatusRead');
-
+      const settlementBtn = $('settlementReviewBtn');
       if(gross <= 0 || enteredMiles <= 0){
         light.className = 'mx-auto w-28 h-28 rounded-full bg-slate-700 border-4 border-slate-500 shadow-xl transition-all duration-300';
         decision.innerText = 'Enter Load Data';
         decision.className = 'text-4xl font-black italic tracking-tight text-white';
         sub.innerText = 'Enter miles and broker pay to check the load.';
         neg.classList.add('hidden');
+        settlementBtn.classList.add('hidden');
         status.innerText = 'Waiting';
         return;
       }
@@ -346,6 +352,7 @@
         decision.className = 'text-4xl font-black italic tracking-tight text-emerald-300';
         sub.innerText = 'Green light: this load clears costs and reaches your target profit.';
         neg.classList.add('hidden');
+        settlementBtn.classList.remove('hidden');
         status.innerText = 'GREEN';
       } else if(state.currentProfit >= 0){
         light.className = 'mx-auto w-28 h-28 rounded-full bg-yellow-400 border-4 border-yellow-200 shadow-[0_0_35px_rgba(234,179,8,.55)] transition-all duration-300';
@@ -354,6 +361,7 @@
         sub.innerText = 'Yellow light: it covers costs, but does not hit the profit goal.';
         $('counterOffer').innerText = 'To hit your profit goal, ask for at least ' + money(state.profitGoalAsk) + '.';
         neg.classList.remove('hidden');
+        settlementBtn.classList.remove('hidden');
         status.innerText = 'YELLOW';
       } else {
         light.className = 'mx-auto w-28 h-28 rounded-full bg-red-600 border-4 border-red-400 shadow-[0_0_35px_rgba(239,68,68,.65)] transition-all duration-300';
@@ -362,6 +370,7 @@
         sub.innerText = 'Red light: this rate does not cover the calculated cost stack.';
         $('counterOffer').innerText = 'To break even, ask for at least ' + money(state.breakEven) + '. To hit the profit goal, ask for ' + money(state.profitGoalAsk) + '.';
         neg.classList.remove('hidden');
+        settlementBtn.classList.add('hidden');
         status.innerText = 'RED';
       }
     }
@@ -403,7 +412,9 @@
       drawer.classList.toggle('open');
       $('strategyArrow').innerText = drawer.classList.contains('open') ? '–' : '+';
     }
-
+function openSettlementReview(){
+  alert('Settlement Review screen will be added next.');
+}
     function saveLoad(){
       const gross = num('grossPay');
       const miles = num('loadedMiles') + num('deadheadMiles');
