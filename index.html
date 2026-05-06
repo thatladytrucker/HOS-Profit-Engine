@@ -502,21 +502,44 @@ function closeSettlementReview(){
   $('settlementOverlay').classList.add('hidden');
 }
     function saveLoad(){
-      const gross = num('grossPay');
-      const miles = num('loadedMiles') + num('deadheadMiles');
-      if(gross <= 0 || miles <= 0){
-        alert('Enter loaded/deadhead miles and broker pay before saving.');
-        return;
-      }
-      if(state.currentProfit <= 0){
-        alert('This load is not profitable yet. Use the negotiation number before saving.');
-        return;
-      }
-      state.weeklyProgress += state.currentProfit;
-      localStorage.setItem('hosProfitWeeklyProgress', state.weeklyProgress);
-      updateMomentum();
-      alert('Profit saved to weekly progress.');
-    }
+  const gross = num('grossPay');
+  const loaded = num('loadedMiles');
+  const deadhead = num('deadheadMiles');
+  const miles = loaded + deadhead;
+
+  if(gross <= 0 || miles <= 0){
+    alert('Enter loaded/deadhead miles and broker pay before saving.');
+    return;
+  }
+
+  if(state.currentProfit <= 0){
+    alert('This load is not profitable yet. Use the negotiation number before saving.');
+    return;
+  }
+
+  const fuelCost = num('fuelCostRead');
+
+  const repairEscrow = miles * 0.15;
+
+  const leaseCost = state.lease / 4;
+  const insuranceCost = (state.insurance + state.otherFixed) / 4;
+
+  const taxableBeforeTax = gross - fuelCost - leaseCost - insuranceCost - repairEscrow;
+  const taxReserve = Math.max(0, taxableBeforeTax * 0.25);
+
+  state.weeklyProgress += state.currentProfit;
+  state.weeklyRepairEscrow += repairEscrow;
+  state.weeklyTaxReserve += taxReserve;
+
+  localStorage.setItem('hosProfitWeeklyProgress', state.weeklyProgress);
+  localStorage.setItem('hosProfitWeeklyRepairEscrow', state.weeklyRepairEscrow);
+  localStorage.setItem('hosProfitWeeklyTaxReserve', state.weeklyTaxReserve);
+
+  updateMomentum();
+  updateReserveReadouts();
+
+  alert('Profit and reserve totals saved to weekly progress.');
+}
 
     function resetLoadOnly(){
       ['loadedMiles','deadheadMiles','grossPay'].forEach(id => $(id).value = '');
