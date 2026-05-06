@@ -442,8 +442,23 @@ function openSettlementReview(){
   const totalMiles = readNumber('totalMiles', 'total') || loaded + deadhead;
 
   const fuelCost = readNumber('fuelCostRead', 'fuelRead', 'estimatedFuelCostRead');
-  const leaseCost = readNumber('vaultLeaseRead');
-  const insuranceCost = readNumber('vaultInsuranceRead');
+  const leaseMonthly =
+  (typeof state !== 'undefined' && state.lease !== undefined)
+    ? Number(state.lease)
+    : readNumber('vaultLeaseRead', 'truckMonthly', 'truckCost', 'leaseCost', 'truck');
+
+const insuranceMonthly =
+  (typeof state !== 'undefined' && state.insurance !== undefined)
+    ? Number(state.insurance)
+    : readNumber('vaultInsuranceRead', 'insuranceMonthly', 'insuranceCost', 'insurance');
+
+const otherMonthly =
+  (typeof state !== 'undefined' && state.otherFixed !== undefined)
+    ? Number(state.otherFixed)
+    : readNumber('vaultOtherRead', 'otherMonthly', 'otherCost', 'other');
+
+const leaseCost = leaseMonthly / 4;
+const insuranceCost = (insuranceMonthly + otherMonthly) / 4;
 
   const repairEscrow = totalMiles * 0.15;
 
