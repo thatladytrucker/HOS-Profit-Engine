@@ -291,7 +291,10 @@
       updateVaultReadouts();
       calculate();
     }
-
+    function updateReserveReadouts(){
+  $('weeklyRepairEscrowRead').innerText = money(state.weeklyRepairEscrow || 0);
+  $('weeklyTaxReserveRead').innerText = money(state.weeklyTaxReserve || 0);
+}
     function updateVaultReadouts(){
   if ($('weeklyNutTop')) {
     $('weeklyNutTop').innerText = money(weeklyNut());
