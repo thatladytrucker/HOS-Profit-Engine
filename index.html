@@ -250,16 +250,18 @@
     };
 
     let state = {
-      ...defaults,
-      tarp: false,
-      dispatch: false,
-      highTax: false,
-      safeHaven: true,
-      currentProfit: 0,
-      breakEven: 0,
-      profitGoalAsk: 0,
-      weeklyProgress: parseFloat(localStorage.getItem('hosProfitWeeklyProgress') || '0')
-    };
+  ...defaults,
+  tarp: false,
+  dispatch: false,
+  highTax: false,
+  safeHaven: true,
+  currentProfit: 0,
+  breakEven: 0,
+  profitGoalAsk: 0,
+  weeklyProgress: parseFloat(localStorage.getItem('hosProfitWeeklyProgress') || '0'),
+  weeklyRepairEscrow: parseFloat(localStorage.getItem('hosProfitWeeklyRepairEscrow') || '0'),
+  weeklyTaxReserve: parseFloat(localStorage.getItem('hosProfitWeeklyTaxReserve') || '0')
+};
 
     function money(n){ return '$' + (Number(n) || 0).toFixed(2); }
     function num(id){ return parseFloat($(id).value) || 0; }
