@@ -413,7 +413,11 @@
       $('strategyArrow').innerText = drawer.classList.contains('open') ? '–' : '+';
     }
 function openSettlementReview(){
-  alert('Settlement Review screen will be added next.');
+  $('settlementOverlay').classList.remove('hidden');
+}
+
+function closeSettlementReview(){
+  $('settlementOverlay').classList.add('hidden');
 }
     function saveLoad(){
       const gross = num('grossPay');
@@ -469,5 +473,69 @@ function openSettlementReview(){
       navigator.serviceWorker.register('./sw.js').catch(() => console.log('Service worker not active yet.'));
     }
   </script>
+  <!-- Settlement Review Overlay -->
+<div id="settlementOverlay" class="hidden fixed inset-0 z-50 bg-black/70 p-4 overflow-y-auto">
+  <div class="max-w-xl mx-auto mt-10 rounded-3xl border border-emerald-500/40 bg-slate-950 p-5 space-y-4 shadow-2xl">
+
+    <div class="flex items-start justify-between gap-3">
+      <div>
+        <p class="text-emerald-300 font-black text-xl">ESTIMATED SETTLEMENT REVIEW</p>
+        <p class="text-slate-400 text-sm">For planning only. Final settlement may vary.</p>
+      </div>
+
+      <button
+        onclick="closeSettlementReview()"
+        class="rounded-xl bg-slate-800 hover:bg-slate-700 px-4 py-2 font-black">
+        X
+      </button>
+    </div>
+
+    <div class="rounded-2xl bg-slate-900 border border-slate-700 p-4 space-y-3">
+
+      <div class="flex justify-between gap-3">
+        <span class="text-slate-300">Broker/Carrier Pay</span>
+        <span id="settleGrossPay" class="font-black">$0.00</span>
+      </div>
+
+      <div class="flex justify-between gap-3">
+        <span class="text-slate-300">Estimated Fuel Cost</span>
+        <span id="settleFuelCost" class="font-black text-red-300">-$0.00</span>
+      </div>
+
+      <div class="flex justify-between gap-3">
+        <span class="text-slate-300">Weekly Truck Lease</span>
+        <span id="settleLeaseCost" class="font-black text-red-300">-$0.00</span>
+      </div>
+
+      <div class="flex justify-between gap-3">
+        <span class="text-slate-300">Insurance/Permits</span>
+        <span id="settleInsuranceCost" class="font-black text-red-300">-$0.00</span>
+      </div>
+
+      <div class="flex justify-between gap-3">
+        <span class="text-slate-300">Repair Escrow</span>
+        <span id="settleRepairEscrow" class="font-black text-yellow-300">-$0.00</span>
+      </div>
+
+      <div class="flex justify-between gap-3">
+        <span class="text-slate-300">Tax Reserve</span>
+        <span id="settleTaxReserve" class="font-black text-yellow-300">-$0.00</span>
+      </div>
+
+      <div class="border-t border-slate-700 pt-3 flex justify-between gap-3 text-xl">
+        <span class="text-emerald-300 font-black">Estimated Settlement</span>
+        <span id="settleNetPay" class="font-black text-emerald-300">$0.00</span>
+      </div>
+
+    </div>
+
+    <button
+      onclick="closeSettlementReview()"
+      class="w-full rounded-2xl bg-emerald-600 hover:bg-emerald-500 p-4 font-black text-lg active:scale-[.98]">
+      Close Review
+    </button>
+
+  </div>
+</div>
 </body>
 </html>
