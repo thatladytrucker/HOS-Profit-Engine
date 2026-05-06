@@ -413,6 +413,29 @@
       $('strategyArrow').innerText = drawer.classList.contains('open') ? '–' : '+';
     }
 function openSettlementReview(){
+  const gross = num($('grossPay').value);
+  const loaded = num($('loadedMiles').value);
+  const deadhead = num($('deadheadMiles').value);
+  const enteredMiles = loaded + deadhead;
+
+  const fuelCost = num($('fuelCostRead').innerText.replace(/[^0-9.-]/g, ''));
+  const leaseCost = num($('vaultLeaseRead').innerText.replace(/[^0-9.-]/g, ''));
+  const insuranceCost = num($('vaultInsuranceRead').innerText.replace(/[^0-9.-]/g, ''));
+  const repairEscrow = enteredMiles * 0.15;
+
+  const taxableBeforeTax = gross - fuelCost - leaseCost - insuranceCost - repairEscrow;
+  const taxReserve = Math.max(0, taxableBeforeTax * 0.25);
+
+  const netPay = gross - fuelCost - leaseCost - insuranceCost - repairEscrow - taxReserve;
+
+  $('settleGrossPay').innerText = money(gross);
+  $('settleFuelCost').innerText = '-' + money(fuelCost);
+  $('settleLeaseCost').innerText = '-' + money(leaseCost);
+  $('settleInsuranceCost').innerText = '-' + money(insuranceCost);
+  $('settleRepairEscrow').innerText = '-' + money(repairEscrow);
+  $('settleTaxReserve').innerText = '-' + money(taxReserve);
+  $('settleNetPay').innerText = money(netPay);
+
   $('settlementOverlay').classList.remove('hidden');
 }
 
