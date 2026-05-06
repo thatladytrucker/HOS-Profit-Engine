@@ -413,30 +413,54 @@
       $('strategyArrow').innerText = drawer.classList.contains('open') ? '–' : '+';
     }
 function openSettlementReview(){
-  const gross = num($('grossPay').value);
-  const loaded = num($('loadedMiles').value);
-  const deadhead = num($('deadheadMiles').value);
-  const enteredMiles = loaded + deadhead;
+  const get = (id) => document.getElementById(id);
 
-  const fuelCost = num($('fuelCostRead').innerText.replace(/[^0-9.-]/g, ''));
-  const leaseCost = num($('vaultLeaseRead').innerText.replace(/[^0-9.-]/g, ''));
-  const insuranceCost = num($('vaultInsuranceRead').innerText.replace(/[^0-9.-]/g, ''));
-  const repairEscrow = enteredMiles * 0.15;
+  const readNumber = (...ids) => {
+    for (const id of ids) {
+      const el = get(id);
+      if (!el) continue;
+
+      const raw = el.value !== undefined ? el.value : el.innerText;
+      const cleaned = String(raw || '').replace(/[^0-9.-]/g, '');
+      const value = parseFloat(cleaned);
+
+      if (isFinite(value)) return value;
+    }
+    return 0;
+  };
+
+  const writeMoney = (id, value, isDeduction = false) => {
+    const el = get(id);
+    if (!el) return;
+
+    el.innerText = isDeduction ? '-' + money(Math.abs(value)) : money(value);
+  };
+
+  const gross = readNumber('grossPay', 'loadPay', 'brokerPay', 'ratePay', 'pay');
+  const loaded = readNumber('loadedMiles', 'loaded');
+  const deadhead = readNumber('deadheadMiles', 'deadhead');
+  const totalMiles = readNumber('totalMiles', 'total') || loaded + deadhead;
+
+  const fuelCost = readNumber('fuelCostRead', 'fuelRead', 'estimatedFuelCostRead');
+  const leaseCost = readNumber('vaultLeaseRead');
+  const insuranceCost = readNumber('vaultInsuranceRead');
+
+  const repairEscrow = totalMiles * 0.15;
 
   const taxableBeforeTax = gross - fuelCost - leaseCost - insuranceCost - repairEscrow;
   const taxReserve = Math.max(0, taxableBeforeTax * 0.25);
 
   const netPay = gross - fuelCost - leaseCost - insuranceCost - repairEscrow - taxReserve;
 
-  $('settleGrossPay').innerText = money(gross);
-  $('settleFuelCost').innerText = '-' + money(fuelCost);
-  $('settleLeaseCost').innerText = '-' + money(leaseCost);
-  $('settleInsuranceCost').innerText = '-' + money(insuranceCost);
-  $('settleRepairEscrow').innerText = '-' + money(repairEscrow);
-  $('settleTaxReserve').innerText = '-' + money(taxReserve);
-  $('settleNetPay').innerText = money(netPay);
+  writeMoney('settleGrossPay', gross);
+  writeMoney('settleFuelCost', fuelCost, true);
+  writeMoney('settleLeaseCost', leaseCost, true);
+  writeMoney('settleInsuranceCost', insuranceCost, true);
+  writeMoney('settleRepairEscrow', repairEscrow, true);
+  writeMoney('settleTaxReserve', taxReserve, true);
+  writeMoney('settleNetPay', netPay);
 
-  $('settlementOverlay').classList.remove('hidden');
+  get('settlementOverlay').classList.remove('hidden');
 }
 
 function closeSettlementReview(){
