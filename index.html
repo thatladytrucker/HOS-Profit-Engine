@@ -502,45 +502,71 @@ function closeSettlementReview(){
   $('settlementOverlay').classList.add('hidden');
 }
     function saveLoad(){
-      alert('Save Win button clicked');
-  const gross = num('grossPay');
-  const loaded = num('loadedMiles');
-  const deadhead = num('deadheadMiles');
-  const miles = loaded + deadhead;
+  try {
+    const get = (id) => document.getElementById(id);
 
-  if(gross <= 0 || miles <= 0){
-    alert('Enter loaded/deadhead miles and broker pay before saving.');
-    return;
+    const readNumber = (id) => {
+      const el = get(id);
+      if(!el) return 0;
+
+      const raw = el.value !== undefined ? el.value : el.innerText;
+      const cleaned = String(raw || '').replace(/[^0-9.-]/g, '');
+      const value = parseFloat(cleaned);
+
+      return isFinite(value) ? value : 0;
+    };
+
+    const gross = readNumber('grossPay');
+    const loaded = readNumber('loadedMiles');
+    const deadhead = readNumber('deadheadMiles');
+    const miles = loaded + deadhead;
+
+    if(gross <= 0 || miles <= 0){
+      alert('Enter loaded/deadhead miles and broker pay before saving.');
+      return;
+    }
+
+    if(state.currentProfit <= 0){
+      alert('This load is not profitable yet. Use the negotiation number before saving.');
+      return;
+    }
+
+    const fuelCost = readNumber('fuelCostRead');
+    const repairEscrow = miles * 0.15;
+
+    const leaseCost = Number(state.lease || 0) / 4;
+    const insuranceCost = (Number(state.insurance || 0) + Number(state.otherFixed || 0)) / 4;
+
+    const taxableBeforeTax = gross - fuelCost - leaseCost - insuranceCost - repairEscrow;
+    const taxReserve = Math.max(0, taxableBeforeTax * 0.25);
+
+    state.weeklyProgress = Number(state.weeklyProgress || 0);
+    state.weeklyRepairEscrow = Number(state.weeklyRepairEscrow || 0);
+    state.weeklyTaxReserve = Number(state.weeklyTaxReserve || 0);
+
+    state.weeklyProgress += state.currentProfit;
+    state.weeklyRepairEscrow += repairEscrow;
+    state.weeklyTaxReserve += taxReserve;
+
+    localStorage.setItem('hosProfitWeeklyProgress', state.weeklyProgress);
+    localStorage.setItem('hosProfitWeeklyRepairEscrow', state.weeklyRepairEscrow);
+    localStorage.setItem('hosProfitWeeklyTaxReserve', state.weeklyTaxReserve);
+
+    updateMomentum();
+    updateReserveReadouts();
+
+    alert(
+      'Saved Win.\n\n' +
+      'Repair Escrow Added: ' + money(repairEscrow) + '\n' +
+      'Tax Reserve Added: ' + money(taxReserve)
+    );
+
+  } catch (error) {
+    alert('Save Win error: ' + error.message);
   }
-
-  if(state.currentProfit <= 0){
-    alert('This load is not profitable yet. Use the negotiation number before saving.');
-    return;
-  }
-
-  const fuelCost = num('fuelCostRead');
-
-  const repairEscrow = miles * 0.15;
-
-  const leaseCost = state.lease / 4;
-  const insuranceCost = (state.insurance + state.otherFixed) / 4;
-
-  const taxableBeforeTax = gross - fuelCost - leaseCost - insuranceCost - repairEscrow;
-  const taxReserve = Math.max(0, taxableBeforeTax * 0.25);
-
-  state.weeklyProgress += state.currentProfit;
-  state.weeklyRepairEscrow += repairEscrow;
-  state.weeklyTaxReserve += taxReserve;
-
-  localStorage.setItem('hosProfitWeeklyProgress', state.weeklyProgress);
-  localStorage.setItem('hosProfitWeeklyRepairEscrow', state.weeklyRepairEscrow);
-  localStorage.setItem('hosProfitWeeklyTaxReserve', state.weeklyTaxReserve);
-
-  updateMomentum();
-  updateReserveReadouts();
-
-  alert('Profit and reserve totals saved to weekly progress.');
 }
+
+
 
     function resetLoadOnly(){
       ['loadedMiles','deadheadMiles','grossPay'].forEach(id => $(id).value = '');
