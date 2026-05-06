@@ -291,7 +291,18 @@
       updateVaultReadouts();
       calculate();
     }
+    function updateReserveReadouts(){
+  const repairBox = document.getElementById('weeklyRepairEscrowRead');
+  const taxBox = document.getElementById('weeklyTaxReserveRead');
 
+  if(repairBox){
+    repairBox.innerText = money(state.weeklyRepairEscrow || 0);
+  }
+
+  if(taxBox){
+    taxBox.innerText = money(state.weeklyTaxReserve || 0);
+  }
+}
     function updateVaultReadouts(){
   if ($('weeklyNutTop')) {
     $('weeklyNutTop').innerText = money(weeklyNut());
