@@ -205,7 +205,25 @@
       </div>
     </section>
   </main>
+<div class="rounded-3xl border border-emerald-500/30 bg-slate-900/70 p-5 space-y-4">
+  <div>
+    <p class="text-slate-400 text-sm tracking-[0.25em] font-black uppercase">Running Reserves</p>
+    <p class="text-emerald-300 font-black text-2xl">Weekly Safety Totals</p>
+    <p class="text-slate-400 text-sm">These totals grow when a saved GREEN or YELLOW load is added.</p>
+  </div>
 
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+    <div class="rounded-2xl border border-slate-700 bg-slate-950 p-4">
+      <p class="text-slate-400 text-sm">Repair Escrow Saved</p>
+      <p id="weeklyRepairEscrowRead" class="text-yellow-300 font-black text-2xl">$0.00</p>
+    </div>
+
+    <div class="rounded-2xl border border-slate-700 bg-slate-950 p-4">
+      <p class="text-slate-400 text-sm">Tax Reserve Saved</p>
+      <p id="weeklyTaxReserveRead" class="text-yellow-300 font-black text-2xl">$0.00</p>
+    </div>
+  </div>
+</div>
   <div class="fixed bottom-0 left-0 right-0 bg-slate-950/95 border-t border-slate-800 p-4">
     <div class="max-w-4xl mx-auto grid grid-cols-2 gap-3">
       <button onclick="saveLoad()" class="rounded-2xl bg-emerald-600 hover:bg-emerald-500 p-4 font-black text-lg active:scale-[.98]">Save Win</button>
