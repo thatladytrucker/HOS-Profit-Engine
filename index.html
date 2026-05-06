@@ -298,6 +298,7 @@
     function updateVaultReadouts(){
   if ($('weeklyNutTop')) {
     $('weeklyNutTop').innerText = money(weeklyNut());
+    updateReserveReadouts();
   }
 }
 
@@ -516,6 +517,28 @@ function closeSettlementReview(){
         return;
       }
       state.weeklyProgress += state.currentProfit;
+      const loaded = num($('loadedMiles').value);
+      const deadhead = num($('deadheadMiles').value);
+      const totalMiles = loaded + deadhead;
+
+      const repairEscrow = totalMiles * 0.15;
+
+      const gross = num($('grossPay').value);
+      const fuelCost = num($('fuelCostRead').innerText.replace(/[^0-9.-]/g, ''));
+
+      const leaseCost = state.lease / 4;
+      const insuranceCost = (state.insurance + state.otherFixed) / 4;
+
+      const taxableBeforeTax = gross - fuelCost - leaseCost - insuranceCost - repairEscrow;
+      const taxReserve = Math.max(0, taxableBeforeTax * 0.25);
+
+state.weeklyRepairEscrow += repairEscrow;
+state.weeklyTaxReserve += taxReserve;
+
+localStorage.setItem('hosProfitWeeklyRepairEscrow', state.weeklyRepairEscrow);
+localStorage.setItem('hosProfitWeeklyTaxReserve', state.weeklyTaxReserve);
+
+updateReserveReadouts();
       localStorage.setItem('hosProfitWeeklyProgress', state.weeklyProgress);
       updateMomentum();
       alert('Profit saved to weekly progress.');
@@ -532,6 +555,13 @@ function closeSettlementReview(){
       if(confirm('Reset weekly progress to $0?')){
         state.weeklyProgress = 0;
         localStorage.setItem('hosProfitWeeklyProgress', '0');
+        state.weeklyRepairEscrow = 0;
+        state.weeklyTaxReserve = 0;
+
+        localStorage.setItem('hosProfitWeeklyRepairEscrow', state.weeklyRepairEscrow);
+        localStorage.setItem('hosProfitWeeklyTaxReserve', state.weeklyTaxReserve);
+
+        updateReserveReadouts();
         updateMomentum();
       }
     }
