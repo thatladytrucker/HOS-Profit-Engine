@@ -268,12 +268,10 @@
     }
 
     function updateVaultReadouts(){
-      $('vaultInsuranceRead').innerText = money(state.insurance).replace('.00','');
-      $('vaultLeaseRead').innerText = money(state.lease).replace('.00','');
-      $('vaultOtherRead').innerText = money(state.otherFixed).replace('.00','');
-      $('vaultFuelRead').innerText = money(state.fuelPrice);
-      $('weeklyNutTop').innerText = money(weeklyNut());
-    }
+  if ($('weeklyNutTop')) {
+    $('weeklyNutTop').innerText = money(weeklyNut());
+  }
+}
 
     function calculate(){
       saveVaultFromInputsNoLoop();
@@ -448,7 +446,10 @@
       alert('HOS Clock button is reserved for your next screen/link. We can connect it to your HOS calculator later.');
     }
 
-    document.querySelectorAll('input').forEach(input => input.addEventListener('input', calculate));
+    document.querySelectorAll('input').forEach(input => {
+  input.addEventListener('input', calculate);
+  input.addEventListener('change', calculate);
+});
 
     loadVault();
     calculate();
