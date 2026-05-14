@@ -285,13 +285,12 @@
       updateVaultReadouts();
     }
 
-    function saveVaultFromInputs(){
+function saveVaultFromInputsNoLoop(){
       ['insurance','lease','otherFixed','fuelPrice','mpg','targetProfit'].forEach(key => {
         state[key] = num(key);
         localStorage.setItem('hosProfit_' + key, state[key]);
       });
       updateVaultReadouts();
-      calculate();
     }
     function updateReserveReadouts(){
   const repairBox = document.getElementById('weeklyRepairEscrowRead');
