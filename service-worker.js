@@ -1,4 +1,4 @@
-const CACHE_NAME = "hos-profit-engine-v1";
+const CACHE_NAME = "hos-profit-engine-v2";
 
 const APP_FILES = [
   "/",
