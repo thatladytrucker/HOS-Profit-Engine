@@ -138,12 +138,12 @@
         <div><label class="label">Broker Pay ($)</label><input id="grossPay" class="field text-emerald-300 font-black" type="number" min="0" step="0.01" placeholder="0.00"></div>
       </div>
 
-      <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <button id="tarpToggle" onclick="toggleOption('tarp')" class="toggle">Tarp / Labor</button>
-        <button id="dispatchToggle" onclick="toggleOption('dispatch')" class="toggle">Dispatch 10%</button>
-        <button id="highTaxToggle" onclick="toggleOption('highTax')" class="toggle warn">High-Tax IFTA</button>
-        <button id="safeHavenToggle" onclick="toggleOption('safeHaven')" class="toggle active">Safe Haven +50 mi</button>
-      </div>
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-3" style="display:none;">
+  <button id="tarpToggle" onclick="toggleOption('tarp')" class="toggle">Tarp / Labor</button>
+  <button id="dispatchToggle" onclick="toggleOption('dispatch')" class="toggle">Dispatch 10%</button>
+  <button id="highTaxToggle" onclick="toggleOption('highTax')" class="toggle warn">High-Tax IFTA</button>
+  <button id="safeHavenToggle" onclick="toggleOption('safeHaven')" class="toggle active">Safe Haven +50 mi</button>
+</div>
 
       <div class="grid grid-cols-2 md:grid-cols-4 gap-3 text-center">
         <div class="soft-card rounded-2xl p-3"><p class="small-note">Total Miles</p><p id="totalMilesRead" class="font-black text-xl">0</p></div>
