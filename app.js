@@ -19,7 +19,18 @@ function openTripPlanner() {
 }
 
 function handleUpgradeToPro() {
-  alert("PRO upgrade will be available through Google Play.");
+  alert(
+    "UPGRADE TO PRO\n\n" +
+    "Get the full HOS Profit Engine:\n" +
+    "• Full Load Feasibility\n" +
+    "• Trip Planner\n" +
+    "• Negotiation Assistant\n" +
+    "• Settlement Review\n" +
+    "• Strategy Reveal\n" +
+    "• Weekly Reserve Tracker\n" +
+    "• Full business cost analysis\n\n" +
+    "PRO will be available through Google Play."
+  );
 }
 
 const upgradeProBtn = $("upgradeProBtn");
