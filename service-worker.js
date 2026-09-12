@@ -33,6 +33,25 @@ self.addEventListener("activate", event => {
 self.addEventListener("fetch", event => {
   if (event.request.method !== "GET") return;
 
+  // Always check the network first for HTML so new app versions appear.
+  if (event.request.mode === "navigate") {
+    event.respondWith(
+      fetch(event.request)
+        .then(response => {
+          const responseClone = response.clone();
+
+          caches.open(CACHE_NAME).then(cache => {
+            cache.put("/index.html", responseClone);
+          });
+
+          return response;
+        })
+        .catch(() => caches.match("/index.html"))
+    );
+    return;
+  }
+
+  // Other files can continue using the cache-first strategy.
   event.respondWith(
     caches.match(event.request).then(cachedResponse => {
       return (
@@ -42,3 +61,4 @@ self.addEventListener("fetch", event => {
     })
   );
 });
+
