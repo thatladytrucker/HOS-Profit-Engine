@@ -6,6 +6,10 @@ function isPro(){
   return USER_TIER === 'PRO';
 }
 
+document.querySelectorAll('.pro-only').forEach(el => {
+  el.classList.toggle('hidden', !isPro());
+});
+
 function openTripPlanner() {
   const planner = document.getElementById("tripPlanner");
   if (!planner) return;
