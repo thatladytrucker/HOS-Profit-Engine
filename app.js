@@ -1,5 +1,11 @@
 const $ = (id) => document.getElementById(id);
 
+const USER_TIER = localStorage.getItem('hosProfitUserTier') || 'FREE';
+
+function isPro(){
+  return USER_TIER === 'PRO';
+}
+
     const defaults = {
       insurance: 1400,
       lease: 2500,
