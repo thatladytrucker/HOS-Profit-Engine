@@ -18,6 +18,12 @@ function openTripPlanner() {
   planner.scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
+function handleUpgradeToPro() {
+  alert("PRO upgrade will be available through Google Play.");
+}
+
+$("upgradeProBtn")?.addEventListener("click", handleUpgradeToPro);
+
 function updateFreeLoadCheck() {
   const loaded = parseFloat($("freeLoadedMiles")?.value) || 0;
   const deadhead = parseFloat($("freeDeadheadMiles")?.value) || 0;
