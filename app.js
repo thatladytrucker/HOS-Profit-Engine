@@ -31,6 +31,9 @@ if (upgradeProBtn) {
   upgradeProBtn.classList.toggle("hidden", isPro());
   upgradeProBtn.addEventListener("click", handleUpgradeToPro);
 }
+$("closeProUpgradeBtn")?.addEventListener("click", function() {
+  $("proUpgradePanel")?.classList.add("hidden");
+});
 
 function updateFreeLoadCheck() {
   const loaded = parseFloat($("freeLoadedMiles")?.value) || 0;
