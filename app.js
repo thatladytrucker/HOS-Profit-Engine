@@ -324,21 +324,33 @@ function calculateTripPlanner() {
 }
 
   if ($('tripPlannerEtaFinalExplain')) {
-    if (finalAppt) {
-      const finalDiff = Math.round(
-        (finalAppt - etaFinal) / 60000
-      );
+  const status = $('tripPlannerEtaFinalExplain');
 
-      $('tripPlannerEtaFinalExplain').textContent =
-        finalDiff < 0
-          ? 'LATE'
-          : finalDiff > 60
-            ? 'TOO EARLY'
-            : 'ON TIME';
+  status.classList.remove(
+    'text-emerald-300',
+    'text-yellow-300',
+    'text-red-300'
+  );
+
+  if (finalAppt) {
+    const finalDiff = Math.round(
+      (finalAppt - etaFinal) / 60000
+    );
+
+    if (finalDiff < 0) {
+      status.textContent = 'LATE';
+      status.classList.add('text-red-300');
+    } else if (finalDiff > 60) {
+      status.textContent = 'TOO EARLY';
+      status.classList.add('text-yellow-300');
     } else {
-      $('tripPlannerEtaFinalExplain').textContent = '';
+      status.textContent = 'ON TIME';
+      status.classList.add('text-emerald-300');
     }
+  } else {
+    status.textContent = '';
   }
+}
 
   if (results) {
     results.classList.remove('hidden');
