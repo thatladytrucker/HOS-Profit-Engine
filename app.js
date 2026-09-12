@@ -6,6 +6,14 @@ function isPro(){
   return USER_TIER === 'PRO';
 }
 
+function openTripPlanner() {
+  const planner = document.getElementById("tripPlanner");
+  if (!planner) return;
+
+  planner.classList.remove("hidden");
+  planner.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
 function updateFreeLoadCheck() {
   const loaded = parseFloat($("freeLoadedMiles")?.value) || 0;
   const deadhead = parseFloat($("freeDeadheadMiles")?.value) || 0;
