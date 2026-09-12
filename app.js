@@ -121,6 +121,127 @@ function saveVaultFromInputsNoLoop(){
   }
 }
 
+function tripPlannerDwell(code) {
+  return {
+    DROP30: 30,
+    DROP60: 60,
+    LIVE60: 60,
+    LIVE120: 120,
+    BACKHAUL90: 90
+  }[code] ?? 0;
+}
+
+function tripPlannerDate(value) {
+  if (!value) return null;
+  const d = new Date(value);
+  return isNaN(d.getTime()) ? null : d;
+}
+
+function calculateTripPlanner() {
+  const tripStart = tripPlannerDate($('tripPlannerStart')?.value);
+
+  const deadhead = parseFloat($('tripPlannerDeadhead')?.value) || 0;
+  const loaded = parseFloat($('tripPlannerLoaded')?.value) || 0;
+  const totalMiles = deadhead + loaded;
+
+  const totalField = $('tripPlannerTotal');
+  if (totalField) {
+    totalField.value = totalMiles.toFixed(0);
+  }
+
+  const mph = Math.max(
+    50,
+    Math.min(75, parseFloat($('tripPlannerMph')?.value) || 60)
+  );
+
+  const shipAppt = tripPlannerDate($('tripPlannerShipperAppt')?.value);
+  const finalAppt = tripPlannerDate($('tripPlannerFinalAppt')?.value);
+
+  const shipStop = $('tripPlannerShipperStop')?.value || 'LIVE60';
+  const finalStop = $('tripPlannerFinalStop')?.value || 'LIVE60';
+
+  const results = $('tripPlannerResults');
+
+  if (!tripStart || totalMiles <= 0 || !shipAppt || !finalAppt) {
+    if (results) results.classList.add('hidden');
+    return;
+  }
+
+  const driveToShipperHours = deadhead / mph;
+
+  const etaShipper = new Date(
+    tripStart.getTime() + driveToShipperHours * 60 * 60 * 1000
+  );
+
+  const ptaShipper = new Date(
+    etaShipper.getTime() +
+    tripPlannerDwell(shipStop) * 60 * 1000
+  );
+
+  const driveToFinalHours = loaded / mph;
+
+  const etaFinal = new Date(
+    ptaShipper.getTime() +
+    driveToFinalHours * 60 * 60 * 1000
+  );
+
+  const ptaFinal = new Date(
+    etaFinal.getTime() +
+    tripPlannerDwell(finalStop) * 60 * 1000
+  );
+
+  const formatDate = date =>
+    date.toLocaleString([], {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+
+  if ($('tripPlannerEtaShipper')) {
+    $('tripPlannerEtaShipper').textContent = formatDate(etaShipper);
+  }
+
+  if ($('tripPlannerPtaShipper')) {
+    $('tripPlannerPtaShipper').textContent = formatDate(ptaShipper);
+  }
+
+  if ($('tripPlannerEtaFinal')) {
+    $('tripPlannerEtaFinal').textContent = formatDate(etaFinal);
+  }
+
+  if ($('tripPlannerPtaFinal')) {
+    $('tripPlannerPtaFinal').textContent = formatDate(ptaFinal);
+  }
+
+  if ($('tripPlannerEtaShipperExplain')) {
+    const shipDiff = Math.round((shipAppt - etaShipper) / 60000);
+
+    $('tripPlannerEtaShipperExplain').textContent =
+      shipDiff < 0
+        ? 'LATE'
+        : shipDiff > 60
+          ? 'TOO EARLY'
+          : 'ON TIME';
+  }
+
+  if ($('tripPlannerEtaFinalExplain')) {
+    const finalDiff = Math.round((finalAppt - etaFinal) / 60000);
+
+    $('tripPlannerEtaFinalExplain').textContent =
+      finalDiff < 0
+        ? 'LATE'
+        : finalDiff > 60
+          ? 'TOO EARLY'
+          : 'ON TIME';
+  }
+
+  if (results) {
+    results.classList.remove('hidden');
+  }
+}
+
     function calculate(){
       saveVaultFromInputsNoLoop();
 
