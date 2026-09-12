@@ -22,7 +22,12 @@ function handleUpgradeToPro() {
   alert("PRO upgrade will be available through Google Play.");
 }
 
-$("upgradeProBtn")?.addEventListener("click", handleUpgradeToPro);
+const upgradeProBtn = $("upgradeProBtn");
+
+if (upgradeProBtn) {
+  upgradeProBtn.classList.toggle("hidden", isPro());
+  upgradeProBtn.addEventListener("click", handleUpgradeToPro);
+}
 
 function updateFreeLoadCheck() {
   const loaded = parseFloat($("freeLoadedMiles")?.value) || 0;
