@@ -295,21 +295,33 @@ function calculateTripPlanner() {
   }
 
   if ($('tripPlannerEtaShipperExplain')) {
-    if (shipAppt) {
-      const shipDiff = Math.round(
-        (shipAppt - etaShipper) / 60000
-      );
+  const status = $('tripPlannerEtaShipperExplain');
 
-      $('tripPlannerEtaShipperExplain').textContent =
-        shipDiff < 0
-          ? 'LATE'
-          : shipDiff > 60
-            ? 'TOO EARLY'
-            : 'ON TIME';
+  status.classList.remove(
+    'text-emerald-300',
+    'text-yellow-300',
+    'text-red-300'
+  );
+
+  if (shipAppt) {
+    const shipDiff = Math.round(
+      (shipAppt - etaShipper) / 60000
+    );
+
+    if (shipDiff < 0) {
+      status.textContent = 'LATE';
+      status.classList.add('text-red-300');
+    } else if (shipDiff > 60) {
+      status.textContent = 'TOO EARLY';
+      status.classList.add('text-yellow-300');
     } else {
-      $('tripPlannerEtaShipperExplain').textContent = '';
+      status.textContent = 'ON TIME';
+      status.classList.add('text-emerald-300');
     }
+  } else {
+    status.textContent = '';
   }
+}
 
   if ($('tripPlannerEtaFinalExplain')) {
     if (finalAppt) {
