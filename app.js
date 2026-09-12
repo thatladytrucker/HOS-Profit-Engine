@@ -35,6 +35,10 @@ $("closeProUpgradeBtn")?.addEventListener("click", function() {
   $("proUpgradePanel")?.classList.add("hidden");
 });
 
+$("purchaseProBtn")?.addEventListener("click", function() {
+  alert("Google Play purchase setup is coming next.");
+});
+
 function updateFreeLoadCheck() {
   const loaded = parseFloat($("freeLoadedMiles")?.value) || 0;
   const deadhead = parseFloat($("freeDeadheadMiles")?.value) || 0;
