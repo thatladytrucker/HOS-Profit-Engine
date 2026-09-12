@@ -298,10 +298,28 @@ function calculateTripPlanner() {
   const status = $('tripPlannerEtaShipperExplain');
 
   status.classList.remove(
-    'text-emerald-300',
-    'text-yellow-300',
-    'text-red-300'
-  );
+  'text-emerald-300',
+  'text-yellow-300',
+  'text-red-300',
+  'bg-emerald-500/20',
+  'bg-yellow-500/20',
+  'bg-red-500/20',
+  'border-emerald-400/40',
+  'border-yellow-400/40',
+  'border-red-400/40'
+);
+
+status.classList.add(
+  'inline-block',
+  'rounded-full',
+  'px-3',
+  'py-1',
+  'font-black',
+  'text-xs',
+  'uppercase',
+  'tracking-wider',
+  'border'
+);
 
   if (shipAppt) {
     const shipDiff = Math.round(
@@ -316,7 +334,11 @@ function calculateTripPlanner() {
       status.classList.add('text-yellow-300');
     } else {
       status.textContent = 'ON TIME';
-      status.classList.add('text-emerald-300');
+      status.classList.add(
+  'text-emerald-300',
+  'bg-emerald-500/20',
+  'border-emerald-400/40'
+);
     }
   } else {
     status.textContent = '';
@@ -327,10 +349,28 @@ function calculateTripPlanner() {
   const status = $('tripPlannerEtaFinalExplain');
 
   status.classList.remove(
-    'text-emerald-300',
-    'text-yellow-300',
-    'text-red-300'
-  );
+  'text-emerald-300',
+  'text-yellow-300',
+  'text-red-300',
+  'bg-emerald-500/20',
+  'bg-yellow-500/20',
+  'bg-red-500/20',
+  'border-emerald-400/40',
+  'border-yellow-400/40',
+  'border-red-400/40'
+);
+
+status.classList.add(
+  'inline-block',
+  'rounded-full',
+  'px-3',
+  'py-1',
+  'font-black',
+  'text-xs',
+  'uppercase',
+  'tracking-wider',
+  'border'
+);
 
   if (finalAppt) {
     const finalDiff = Math.round(
@@ -345,7 +385,11 @@ function calculateTripPlanner() {
       status.classList.add('text-yellow-300');
     } else {
       status.textContent = 'ON TIME';
-      status.classList.add('text-emerald-300');
+      status.classList.add(
+  'text-emerald-300',
+  'bg-emerald-500/20',
+  'border-emerald-400/40'
+);
     }
   } else {
     status.textContent = '';
