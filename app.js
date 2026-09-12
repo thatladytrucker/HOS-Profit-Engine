@@ -555,5 +555,33 @@ $("freeLoadedMiles")?.addEventListener("input", updateFreeLoadCheck);
 $("freeDeadheadMiles")?.addEventListener("input", updateFreeLoadCheck);
 $("freeBrokerPay")?.addEventListener("input", updateFreeLoadCheck);
 
-    loadVault();
-    calculate();
+// TRIP PLANNER CONTROLS
+$("tripPlannerDeadhead")?.addEventListener("input", calculateTripPlanner);
+$("tripPlannerLoaded")?.addEventListener("input", calculateTripPlanner);
+
+$("tripPlannerMph")?.addEventListener("input", function() {
+  const value = $("tripPlannerMph")?.value || 60;
+  if ($("tripPlannerMphVal")) {
+    $("tripPlannerMphVal").textContent = value;
+  }
+});
+
+$("tripPlannerCalc")?.addEventListener("click", calculateTripPlanner);
+
+$("tripPlannerReset")?.addEventListener("click", function() {
+  $("tripPlannerDeadhead").value = "";
+  $("tripPlannerLoaded").value = "";
+  $("tripPlannerTotal").value = "";
+  $("tripPlannerResults")?.classList.add("hidden");
+
+  if ($("tripPlannerMph")) {
+    $("tripPlannerMph").value = 60;
+  }
+
+  if ($("tripPlannerMphVal")) {
+    $("tripPlannerMphVal").textContent = "60";
+  }
+});
+
+loadVault();
+calculate();
