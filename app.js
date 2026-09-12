@@ -328,7 +328,11 @@ status.classList.add(
 
     if (shipDiff < 0) {
       status.textContent = 'LATE';
-      status.classList.add('text-red-300');
+      status.classList.add(
+  'text-red-300',
+  'bg-red-500/20',
+  'border-red-400/40'
+);
     } else if (shipDiff > 60) {
       status.textContent = 'TOO EARLY';
       status.classList.add(
@@ -383,7 +387,11 @@ status.classList.add(
 
     if (finalDiff < 0) {
       status.textContent = 'LATE';
-      status.classList.add('text-red-300');
+      status.classList.add(
+  'text-red-300',
+  'bg-red-500/20',
+  'border-red-400/40'
+);
     } else if (finalDiff > 60) {
       status.textContent = 'TOO EARLY';
       status.classList.add(
