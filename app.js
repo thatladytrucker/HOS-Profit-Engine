@@ -6,6 +6,39 @@ function isPro(){
   return USER_TIER === 'PRO';
 }
 
+function updateFreeLoadCheck() {
+  const loaded = parseFloat($("freeLoadedMiles")?.value) || 0;
+  const deadhead = parseFloat($("freeDeadheadMiles")?.value) || 0;
+  const brokerPay = parseFloat($("freeBrokerPay")?.value) || 0;
+
+  const decision = $("freeDecision");
+  const decisionText = $("freeDecisionText");
+  const decisionSubtext = $("freeDecisionSubtext");
+
+  if (!decision || !decisionText || !decisionSubtext) return;
+
+  if (loaded <= 0 || deadhead < 0 || brokerPay <= 0) {
+    decisionText.textContent = "ENTER LOAD DATA";
+    decisionSubtext.textContent =
+      "Enter loaded miles, deadhead miles, and broker pay.";
+    return;
+  }
+
+  const totalMiles = loaded + deadhead;
+  const ratePerMile = brokerPay / totalMiles;
+
+  if (ratePerMile >= 2.00) {
+    decisionText.textContent = "TAKE THIS LOAD";
+    decisionSubtext.textContent = "This load meets the FREE load threshold.";
+  } else if (ratePerMile >= 1.50) {
+    decisionText.textContent = "NEGOTIATE BEFORE ACCEPTING";
+    decisionSubtext.textContent = "This load may need a better rate.";
+  } else {
+    decisionText.textContent = "DON'T TAKE THIS LOAD";
+    decisionSubtext.textContent = "This load is below the FREE load threshold.";
+  }
+}
+
     const defaults = {
       insurance: 1400,
       lease: 2500,
@@ -388,6 +421,10 @@ function closeSettlementReview(){
   input.addEventListener('input', calculate);
   input.addEventListener('change', calculate);
 });
+
+$("freeLoadedMiles")?.addEventListener("input", updateFreeLoadCheck);
+$("freeDeadheadMiles")?.addEventListener("input", updateFreeLoadCheck);
+$("freeBrokerPay")?.addEventListener("input", updateFreeLoadCheck);
 
     loadVault();
     calculate();
