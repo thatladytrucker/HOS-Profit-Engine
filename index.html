@@ -233,13 +233,8 @@
     </div>
   </div>
 
-  <script>
     <script src="app.js"></script>
-
-    if('serviceWorker' in navigator){
-      navigator.serviceWorker.register('./sw.js').catch(() => console.log('Service worker not active yet.'));
-    }
-  </script>
+ 
   <!-- Settlement Review Overlay -->
 <div id="settlementOverlay" class="hidden fixed inset-0 z-50 bg-black/70 p-4 overflow-y-auto">
   <div class="max-w-xl mx-auto mt-10 rounded-3xl border border-emerald-500/40 bg-slate-950 p-5 space-y-4 shadow-2xl">
