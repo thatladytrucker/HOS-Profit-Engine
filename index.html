@@ -112,6 +112,171 @@
   </div>
 </section>   
 
+    <!-- TRIP PLANNER -->
+<section id="tripPlanner" class="glass rounded-3xl p-5 space-y-5 hidden">
+  <div class="flex items-center justify-between gap-3">
+    <div>
+      <p class="text-xs uppercase tracking-[.18em] text-slate-400 font-black">PRO</p>
+      <h2 class="section-title">Trip Planner</h2>
+      <p class="small-note mt-1">Plan the trip before you accept the load.</p>
+    </div>
+    <span class="text-xs font-black uppercase tracking-widest text-amber-300">PRO</span>
+  </div>
+
+  <div>
+    <label class="label">Average MPH — 50 to 75</label>
+    <div class="flex items-center gap-3">
+      <input
+        id="tripPlannerMph"
+        type="range"
+        min="50"
+        max="75"
+        step="1"
+        value="60"
+        class="w-full"
+      >
+      <span class="pill whitespace-nowrap">
+        <span id="tripPlannerMphVal">60</span> MPH
+      </span>
+    </div>
+  </div>
+
+  <div>
+    <label class="label">Trip Start</label>
+    <input
+      id="tripPlannerStart"
+      type="datetime-local"
+      class="field"
+    >
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+    <div>
+      <label class="label">Deadhead Miles</label>
+      <input
+        id="tripPlannerDeadhead"
+        type="number"
+        inputmode="decimal"
+        min="0"
+        class="field"
+        placeholder="0"
+      >
+    </div>
+
+    <div>
+      <label class="label">Loaded Miles</label>
+      <input
+        id="tripPlannerLoaded"
+        type="number"
+        inputmode="decimal"
+        min="0"
+        class="field"
+        placeholder="0"
+      >
+    </div>
+
+    <div>
+      <label class="label">Total Miles</label>
+      <input
+        id="tripPlannerTotal"
+        type="number"
+        class="field"
+        readonly
+        tabindex="-1"
+        placeholder="0"
+      >
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div>
+      <label class="label">Shipper Appointment</label>
+      <input
+        id="tripPlannerShipperAppt"
+        type="datetime-local"
+        class="field"
+      >
+    </div>
+
+    <div>
+      <label class="label">Shipper Stop Type</label>
+      <select id="tripPlannerShipperStop" class="field">
+        <option value="DROP30">Drop 30</option>
+        <option value="DROP60">Drop 60</option>
+        <option value="LIVE60">Live 60</option>
+        <option value="LIVE120">Live 120</option>
+        <option value="BACKHAUL90">Backhaul 90</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div>
+      <label class="label">Final Appointment</label>
+      <input
+        id="tripPlannerFinalAppt"
+        type="datetime-local"
+        class="field"
+      >
+    </div>
+
+    <div>
+      <label class="label">Final Stop Type</label>
+      <select id="tripPlannerFinalStop" class="field">
+        <option value="DROP30">Drop 30</option>
+        <option value="DROP60">Drop 60</option>
+        <option value="LIVE60">Live 60</option>
+        <option value="LIVE120">Live 120</option>
+        <option value="BACKHAUL90">Backhaul 90</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="flex gap-3">
+    <button
+      id="tripPlannerCalc"
+      type="button"
+      class="flex-1 rounded-2xl bg-emerald-500 text-slate-950 p-4 font-black active:scale-[.98]"
+    >
+      Calculate
+    </button>
+
+    <button
+      id="tripPlannerReset"
+      type="button"
+      class="flex-1 rounded-2xl bg-slate-950 border border-slate-700 p-4 font-black active:scale-[.98]"
+    >
+      Reset
+    </button>
+  </div>
+
+  <div id="tripPlannerResults" class="hidden space-y-3">
+
+    <div class="soft-card rounded-2xl p-4">
+      <p class="small-note">ETA TO SHIPPER</p>
+      <p id="tripPlannerEtaShipper" class="font-black text-xl">—</p>
+      <p id="tripPlannerEtaShipperExplain" class="small-note mt-1"></p>
+    </div>
+
+    <div class="soft-card rounded-2xl p-4">
+      <p class="small-note">PTA AFTER SHIPPER STOP</p>
+      <p id="tripPlannerPtaShipper" class="font-black text-xl">—</p>
+    </div>
+
+    <div class="soft-card rounded-2xl p-4">
+      <p class="small-note">ETA TO FINAL</p>
+      <p id="tripPlannerEtaFinal" class="font-black text-xl">—</p>
+      <p id="tripPlannerEtaFinalExplain" class="small-note mt-1"></p>
+    </div>
+
+    <div class="soft-card rounded-2xl p-4">
+      <p class="small-note">PTA AFTER FINAL STOP</p>
+      <p id="tripPlannerPtaFinal" class="font-black text-xl">—</p>
+    </div>
+
+  </div>
+</section>
+
     <!-- 2. THE VAULT -->
 <section class="glass rounded-3xl p-5 space-y-4">
   <div class="flex items-center justify-between gap-3">
