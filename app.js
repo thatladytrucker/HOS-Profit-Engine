@@ -331,7 +331,11 @@ status.classList.add(
       status.classList.add('text-red-300');
     } else if (shipDiff > 60) {
       status.textContent = 'TOO EARLY';
-      status.classList.add('text-yellow-300');
+      status.classList.add(
+  'text-yellow-300',
+  'bg-yellow-500/20',
+  'border-yellow-400/40'
+);
     } else {
       status.textContent = 'ON TIME';
       status.classList.add(
@@ -382,7 +386,11 @@ status.classList.add(
       status.classList.add('text-red-300');
     } else if (finalDiff > 60) {
       status.textContent = 'TOO EARLY';
-      status.classList.add('text-yellow-300');
+      status.classList.add(
+  'text-yellow-300',
+  'bg-yellow-500/20',
+  'border-yellow-400/40'
+);
     } else {
       status.textContent = 'ON TIME';
       status.classList.add(
