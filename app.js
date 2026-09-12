@@ -150,8 +150,12 @@ function calculateTripPlanner() {
 
   const mph = Math.max(
     50,
-    Math.min(75, parseFloat($('tripPlannerMph')?.value) || 60)
+    Math.min(75, parseFloat($('tripPlannerMph')?.value) || 50)
   );
+
+  if ($('tripPlannerMphVal')) {
+    $('tripPlannerMphVal').textContent = mph;
+  }
 
   const shipAppt = tripPlannerDate($('tripPlannerShipperAppt')?.value);
   const finalAppt = tripPlannerDate($('tripPlannerFinalAppt')?.value);
@@ -162,138 +166,170 @@ function calculateTripPlanner() {
   const results = $('tripPlannerResults');
 
   if (!tripStart || totalMiles <= 0) {
-    if (results) results.classList.add('hidden');
+    if (results) {
+      results.classList.add('hidden');
+    }
     return;
   }
 
   /*
    * HOS SAFETY LOGIC — 9/2 RULE
    *
-   * 0–4 hours driving:
-   *   Continue driving.
+   * The entire trip uses ONE continuous driving-day clock.
    *
-   * At 4 hours:
-   *   Schedule the 30-minute break when the trip requires
-   *   8 or more total driving hours.
+   * If total trip driving is 8+ hours:
    *
-   * Up to 9 hours driving:
-   *   Continue after the 30-minute break.
+   *   First 4 hours driving
+   *   → 30-minute break
+   *   → Continue driving to 9 hours
+   *   → 2-hour parking buffer
+   *   → 10-hour off-duty break
+   *   → New driving day
    *
-   * At 9 hours driving:
-   *   2-hour parking buffer
-   *   10-hour off-duty break
-   *   Resume remaining miles.
+   * The same process repeats for every additional
+   * 9-hour driving day.
    *
-   * The same 9-hour cycle repeats for each additional
-   * driving day.
+   * Deadhead and loaded miles do NOT reset the
+   * driving-day clock at the shipper.
    */
 
-  function driveWithSafety(startTime, miles) {
-    let current = new Date(startTime.getTime());
+  const totalDrivingHours = totalMiles / mph;
+  const requiresThirtyMinuteBreak = totalDrivingHours >= 8;
+
+  const state = {
+    currentTime: new Date(tripStart.getTime()),
+    drivingToday: 0
+  };
+
+  function driveMiles(miles) {
     let remainingMiles = Math.max(0, miles);
-    let drivingToday = 0;
-    let breakTaken = false;
-    let breakTime = null;
-    let resetCount = 0;
 
     while (remainingMiles > 0) {
-      const remainingDrivingCapacity = 9 - drivingToday;
 
-      // 30-minute break must occur by 4 hours of driving
-      // when the trip requires at least 8 total driving hours.
-      if (!breakTaken && drivingToday >= 4) {
-        current = new Date(current.getTime() + 30 * 60 * 1000);
-        breakTaken = true;
-        breakTime = new Date(current.getTime());
-        continue;
-      }
-
-      const milesUntilFourHours = Math.max(0, (4 - drivingToday) * mph);
-
-      // If we have not taken the break and this leg reaches
-      // the 4-hour point, drive to 4 hours first.
-      if (!breakTaken && milesUntilFourHours > 0 && remainingMiles > milesUntilFourHours) {
-        const driveHours = milesUntilFourHours / mph;
-
-        current = new Date(
-          current.getTime() + driveHours * 60 * 60 * 1000
+      /*
+       * 30-minute break:
+       * Required once the trip requires 8+ total hours
+       * of driving, and it must occur by 4 hours.
+       */
+      if (
+        requiresThirtyMinuteBreak &&
+        state.drivingToday >= 4 &&
+        state.drivingToday < 9
+      ) {
+        state.currentTime = new Date(
+          state.currentTime.getTime() + 30 * 60 * 1000
         );
 
-        drivingToday += driveHours;
-        remainingMiles -= milesUntilFourHours;
         continue;
       }
 
-      const milesUntilNineHours = remainingDrivingCapacity * mph;
+      /*
+       * If the driver has reached 9 hours,
+       * apply the 2-hour parking buffer + 10-hour break.
+       */
+      if (state.drivingToday >= 9) {
+        state.currentTime = new Date(
+          state.currentTime.getTime() + 12 * 60 * 60 * 1000
+        );
 
-      if (remainingMiles <= milesUntilNineHours) {
+        state.drivingToday = 0;
+
+        continue;
+      }
+
+      /*
+       * Determine how many driving hours remain
+       * before the next safety event.
+       */
+      let hoursUntilSafetyEvent = 9 - state.drivingToday;
+
+      if (
+        requiresThirtyMinuteBreak &&
+        state.drivingToday < 4
+      ) {
+        hoursUntilSafetyEvent = 4 - state.drivingToday;
+      }
+
+      const milesUntilSafetyEvent =
+        hoursUntilSafetyEvent * mph;
+
+      /*
+       * Finish the remaining miles if they fit
+       * before the next safety event.
+       */
+      if (remainingMiles <= milesUntilSafetyEvent) {
         const driveHours = remainingMiles / mph;
 
-        current = new Date(
-          current.getTime() + driveHours * 60 * 60 * 1000
+        state.currentTime = new Date(
+          state.currentTime.getTime() +
+          driveHours * 60 * 60 * 1000
         );
 
-        drivingToday += driveHours;
+        state.drivingToday += driveHours;
         remainingMiles = 0;
+
         break;
       }
 
-      // Driver reaches the 9-hour safety limit.
-      current = new Date(
-        current.getTime() + remainingDrivingCapacity * 60 * 60 * 1000
+      /*
+       * Drive exactly to the next safety event.
+       */
+      const driveHours = hoursUntilSafetyEvent;
+
+      state.currentTime = new Date(
+        state.currentTime.getTime() +
+        driveHours * 60 * 60 * 1000
       );
 
-      remainingMiles -= milesUntilNineHours;
-      drivingToday = 9;
+      remainingMiles -= milesUntilSafetyEvent;
+      state.drivingToday += driveHours;
 
-      // 2-hour parking buffer + 10-hour break.
-      current = new Date(
-        current.getTime() + 12 * 60 * 60 * 1000
-      );
-
-      resetCount++;
-
-      // New driving day.
-      drivingToday = 0;
-      breakTaken = false;
-      breakTime = null;
+      /*
+       * Loop again so the correct break or reset
+       * is inserted at the exact point.
+       */
     }
 
-    return {
-      time: current,
-      resetCount,
-      breakTime
-    };
+    return new Date(state.currentTime.getTime());
   }
 
   /*
    * DEADHEAD → SHIPPER
+   *
+   * This uses the same continuous driving-day clock
+   * that will continue into the loaded portion.
    */
-  const shipResult = driveWithSafety(tripStart, deadhead);
-  const etaShipper = shipResult.time;
+  const etaShipper = driveMiles(deadhead);
 
   /*
-   * Shipper dwell.
+   * SHIPPER DWELL
    */
   const ptaShipper = new Date(
     etaShipper.getTime() +
     tripPlannerDwell(shipStop) * 60 * 1000
   );
 
-  /*
-   * LOADED MILES → FINAL
-   */
-  const finalResult = driveWithSafety(ptaShipper, loaded);
-  const etaFinal = finalResult.time;
+  state.currentTime = new Date(ptaShipper.getTime());
 
   /*
-   * Final stop dwell.
+   * LOADED MILES → FINAL
+   *
+   * IMPORTANT:
+   * The driving-day clock is NOT reset here.
+   */
+  const etaFinal = driveMiles(loaded);
+
+  /*
+   * FINAL DWELL
    */
   const ptaFinal = new Date(
     etaFinal.getTime() +
     tripPlannerDwell(finalStop) * 60 * 1000
   );
 
+  /*
+   * DATE/TIME DISPLAY
+   */
   const formatDate = date =>
     date.toLocaleString([], {
       year: 'numeric',
@@ -304,45 +340,63 @@ function calculateTripPlanner() {
     });
 
   if ($('tripPlannerEtaShipper')) {
-    $('tripPlannerEtaShipper').textContent = formatDate(etaShipper);
+    $('tripPlannerEtaShipper').textContent =
+      formatDate(etaShipper);
   }
 
   if ($('tripPlannerPtaShipper')) {
-    $('tripPlannerPtaShipper').textContent = formatDate(ptaShipper);
+    $('tripPlannerPtaShipper').textContent =
+      formatDate(ptaShipper);
   }
 
   if ($('tripPlannerEtaFinal')) {
-    $('tripPlannerEtaFinal').textContent = formatDate(etaFinal);
+    $('tripPlannerEtaFinal').textContent =
+      formatDate(etaFinal);
   }
 
   if ($('tripPlannerPtaFinal')) {
-    $('tripPlannerPtaFinal').textContent = formatDate(ptaFinal);
+    $('tripPlannerPtaFinal').textContent =
+      formatDate(ptaFinal);
   }
 
+  /*
+   * SHIPPER APPOINTMENT STATUS
+   */
   if ($('tripPlannerEtaShipperExplain')) {
-    const shipDiff = Math.round(
-      (shipAppt - etaShipper) / 60000
-    );
+    if (shipAppt) {
+      const shipDiff = Math.round(
+        (shipAppt - etaShipper) / 60000
+      );
 
-    $('tripPlannerEtaShipperExplain').textContent =
-      shipDiff < 0
-        ? 'LATE'
-        : shipDiff > 60
-          ? 'TOO EARLY'
-          : 'ON TIME';
+      $('tripPlannerEtaShipperExplain').textContent =
+        shipDiff < 0
+          ? 'LATE'
+          : shipDiff > 60
+            ? 'TOO EARLY'
+            : 'ON TIME';
+    } else {
+      $('tripPlannerEtaShipperExplain').textContent = '';
+    }
   }
 
+  /*
+   * FINAL APPOINTMENT STATUS
+   */
   if ($('tripPlannerEtaFinalExplain')) {
-    const finalDiff = Math.round(
-      (finalAppt - etaFinal) / 60000
-    );
+    if (finalAppt) {
+      const finalDiff = Math.round(
+        (finalAppt - etaFinal) / 60000
+      );
 
-    $('tripPlannerEtaFinalExplain').textContent =
-      finalDiff < 0
-        ? 'LATE'
-        : finalDiff > 60
-          ? 'TOO EARLY'
-          : 'ON TIME';
+      $('tripPlannerEtaFinalExplain').textContent =
+        finalDiff < 0
+          ? 'LATE'
+          : finalDiff > 60
+            ? 'TOO EARLY'
+            : 'ON TIME';
+    } else {
+      $('tripPlannerEtaFinalExplain').textContent = '';
+    }
   }
 
   if (results) {
