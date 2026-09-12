@@ -1,0 +1,9 @@
+9/12/2026
+So I'd do this in this order:
+
+1. Keep May 14 working exactly as it is. ✅
+2. Make a backup/master copy.
+3. Separate the JavaScript into app.js.
+4. Test that the app looks and works exactly the same.
+5. Only then build FREE.
+6. Then build PRO.
