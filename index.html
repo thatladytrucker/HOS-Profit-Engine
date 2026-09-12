@@ -74,6 +74,44 @@
       </div>
     </header>
 
+ <!-- FREE LOAD CHECK -->
+<section id="freeLoadCheck" class="glass rounded-3xl p-5 space-y-4">
+  <div class="flex items-center justify-between gap-3">
+    <div>
+      <p class="text-xs uppercase tracking-[.18em] text-slate-400 font-black">FREE</p>
+      <h2 class="section-title">Load Check</h2>
+      <p class="small-note mt-1">Know the load before you commit.</p>
+    </div>
+    <span class="text-xs font-black uppercase tracking-widest text-emerald-300">FREE</span>
+  </div>
+
+  <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+    <div>
+      <label class="label">Loaded Miles</label>
+      <input id="freeLoadedMiles" type="number" inputmode="decimal" min="0" class="field" placeholder="0">
+    </div>
+
+    <div>
+      <label class="label">Deadhead Miles</label>
+      <input id="freeDeadheadMiles" type="number" inputmode="decimal" min="0" class="field" placeholder="0">
+    </div>
+
+    <div>
+      <label class="label">Broker Pay</label>
+      <input id="freeBrokerPay" type="number" inputmode="decimal" min="0" step="0.01" class="field" placeholder="$0">
+    </div>
+  </div>
+
+  <div id="freeDecision" class="rounded-2xl border border-slate-600 bg-slate-950 p-5 text-center">
+    <div id="freeDecisionText" class="text-3xl font-black italic text-white">
+      ENTER LOAD DATA
+    </div>
+    <div id="freeDecisionSubtext" class="small-note mt-2">
+      Enter loaded miles, deadhead miles, and broker pay.
+    </div>
+  </div>
+</section>   
+
     <!-- 2. THE VAULT -->
 <section class="glass rounded-3xl p-5 space-y-4">
   <div class="flex items-center justify-between gap-3">
