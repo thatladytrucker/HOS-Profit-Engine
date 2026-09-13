@@ -35,8 +35,8 @@ $("closeProUpgradeBtn")?.addEventListener("click", function() {
   $("proUpgradePanel")?.classList.add("hidden");
 });
 
-$("purchaseProBtn")?.addEventListener("click", function() {
-  alert("Google Play purchase setup is coming next.");
+$("purchaseProBtn")?.addEventListener("click", async function() {
+  console.log("PRO purchase button clicked");
 });
 
 function updateFreeLoadCheck() {
