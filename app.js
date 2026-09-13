@@ -1,4 +1,5 @@
 const $ = (id) => document.getElementById(id);
+const digitalGoodsService = window.getDigitalGoodsService;
 
 const USER_TIER = localStorage.getItem('hosProfitUserTier') || 'FREE';
 
