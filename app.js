@@ -1,5 +1,7 @@
 const $ = (id) => document.getElementById(id);
-const digitalGoodsService = window.getDigitalGoodsService;
+const digitalGoodsService = typeof window.getDigitalGoodsService === "function"
+  ? window.getDigitalGoodsService
+  : null;
 
 const USER_TIER = localStorage.getItem('hosProfitUserTier') || 'FREE';
 
